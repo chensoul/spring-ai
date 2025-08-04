@@ -2,7 +2,7 @@
 spring:
   application:
     name: spring-ai-demo
-    
+
   # 数据库配置
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/postgres}
@@ -13,7 +13,7 @@ spring:
       maximum-pool-size: 20
       minimum-idle: 5
       connection-timeout: 30000
-      
+
   # JPA 配置
   jpa:
     hibernate:
@@ -23,7 +23,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
         show_sql: false
-        
+
   # Spring AI 配置
   ai:
     # OpenAI 配置
@@ -49,19 +49,6 @@ spring:
         table-name: ${PGVECTOR_TABLE:vector_store}
         max-document-batch-size: ${PGVECTOR_BATCH_SIZE:10000}
         schema-validation: true
-
-# 服务器配置
-server:
-  port: ${SERVER_PORT:8080}
-
-# 日志配置
-logging:
-  level:
-    org.springframework.ai: ${LOG_LEVEL_AI:INFO}
-    com.example.springai: ${LOG_LEVEL_APP:INFO}
-    org.springframework.jdbc: ${LOG_LEVEL_JDBC:WARN}
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 # 管理端点配置
 management:

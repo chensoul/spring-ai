@@ -2,7 +2,8 @@
 
 ## 概述
 
-本指南基于Spring AI框架的最新功能特性，提供从基础概念到高级应用的完整技术指南。包括框架核心原理、开发环境搭建、实际开发指南、进阶技能和完整的实战项目示例，帮助开发者快速掌握Spring AI并构建生产级AI应用。
+本指南基于Spring AI框架的最新功能特性，提供从基础概念到高级应用的完整技术指南。包括框架核心原理、开发环境搭建、实际开发指南、进阶技能和完整的实战项目示例，帮助开发者快速掌握Spring
+AI并构建生产级AI应用。
 
 ## 目录
 
@@ -21,6 +22,7 @@
 Spring AI 1.0 正式版带来了许多重要的改进和新特性：
 
 **核心改进：**
+
 - **稳定的 API**：1.0 版本标志着 API 的稳定，向后兼容性得到保证
 - **增强的向量存储支持**：新增对 Oracle、Neo4j、MariaDB 等数据库的支持
 - **改进的自动配置**：更细粒度的自动配置模块，支持按需加载
@@ -29,30 +31,31 @@ Spring AI 1.0 正式版带来了许多重要的改进和新特性：
 
 **依赖管理改进：**
 
-| 组件类型 | 旧版本依赖 | Spring AI 1.0 依赖 |
-|----------|------------|-------------------|
-| Redis 向量存储 | `spring-ai-redis-store-spring-boot-starter` | `spring-ai-starter-vector-store-redis` |
-| PostgreSQL 向量存储 | `spring-ai-pgvector-store` | `spring-ai-starter-vector-store-pgvector` |
-| OpenAI 模型 | `spring-ai-openai-spring-boot-starter` | `spring-ai-starter-model-openai` |
-| Anthropic 模型 | `spring-ai-anthropic-spring-boot-starter` | `spring-ai-starter-model-anthropic` |
-| Ollama 模型 | `spring-ai-ollama-spring-boot-starter` | `spring-ai-starter-model-ollama` |
+| 组件类型            | 旧版本依赖                                       | Spring AI 1.0 依赖                          |
+|-----------------|---------------------------------------------|-------------------------------------------|
+| Redis 向量存储      | `spring-ai-redis-store-spring-boot-starter` | `spring-ai-starter-vector-store-redis`    |
+| PostgreSQL 向量存储 | `spring-ai-pgvector-store`                  | `spring-ai-starter-vector-store-pgvector` |
+| OpenAI 模型       | `spring-ai-openai-spring-boot-starter`      | `spring-ai-starter-model-openai`          |
+| Anthropic 模型    | `spring-ai-anthropic-spring-boot-starter`   | `spring-ai-starter-model-anthropic`       |
+| Ollama 模型       | `spring-ai-ollama-spring-boot-starter`      | `spring-ai-starter-model-ollama`          |
 
 - 新的 starter 命名规范：`spring-ai-starter-vector-store-*` 和 `spring-ai-starter-model-*`
 - 更精确的依赖管理，减少不必要的传递依赖
 - 支持 Spring Boot 3.3+ 和 Java 17+
 
 **向量存储增强：**
+
 - **PostgreSQL 17 + pgvector**：完整支持最新的 PostgreSQL 17 和 pgvector 扩展
 - **Oracle AI Vector Search**：企业级向量搜索支持
 - **Neo4j Vector Index**：图数据库向量搜索集成
 - **MariaDB Vector**：开源关系型数据库向量支持
 
 **配置属性重命名：**
+
 ```properties
 # 旧版本（已废弃）
 spring.ai.chat.observations.include-prompt
 spring.ai.chat.observations.include-completion
-
 # 新版本（1.0+）
 spring.ai.chat.observations.log-prompt
 spring.ai.chat.observations.log-completion
@@ -63,12 +66,14 @@ spring.ai.chat.observations.log-completion
 Spring AI是一个为Java开发者设计的AI应用框架，它将AI能力无缝集成到Spring生态系统中。其核心设计理念包括：
 
 **设计原则：**
+
 - **模型可移植性**：统一API支持多种AI模型提供商，避免供应商锁定
 - **Spring生态集成**：与Spring Boot、Spring Cloud无缝集成
 - **企业级特性**：内置安全、监控、扩展性支持
 - **开发者友好**：自动配置、依赖注入、类型安全
 
 **架构优势：**
+
 - 降低AI应用开发门槛
 - 提供生产级的稳定性和性能
 - 支持快速原型和迭代开发
@@ -87,7 +92,7 @@ graph TB
     F[VectorStore] --> G[Redis/Elasticsearch/PGVector]
     H[EmbeddingModel] --> I[OpenAI/Azure/Ollama]
     J[Function Calling] --> K[@Tool Annotations]
-    L[Auto Configuration] --> M[Spring Boot Starters]
+L[Auto Configuration] --> M[Spring Boot Starters]
 ```
 
 **核心组件说明：**
@@ -103,12 +108,14 @@ graph TB
 ### 1.3 与传统AI开发方式的区别
 
 **传统AI开发方式：**
+
 - 直接调用AI模型API
 - 手动处理HTTP请求和响应
 - 自行实现重试、错误处理
 - 缺乏统一的抽象层
 
 **Spring AI开发方式：**
+
 - 统一的ChatClient API
 - 自动配置和依赖注入
 - 内置重试、错误处理机制
@@ -127,17 +134,17 @@ public class TraditionalAIService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, Object> request = Map.of(
-            "model", "gpt-4o",
-            "messages", List.of(Map.of("role", "user", "content", message))
+                "model", "gpt-4o",
+                "messages", List.of(Map.of("role", "user", "content", message))
         );
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
 
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(
-                "https://api.openai.com/v1/chat/completions",
-                entity,
-                Map.class
+                    "https://api.openai.com/v1/chat/completions",
+                    entity,
+                    Map.class
             );
 
             return extractContent(response.getBody());
@@ -159,8 +166,8 @@ public class SpringAIService {
 
     public String chat(String message) {
         return chatClient.prompt(message)
-            .call()
-            .content();
+                .call()
+                .content();
     }
 }
 ```
@@ -187,18 +194,24 @@ ChatClient API是Spring AI的核心接口，采用流式API设计，提供类型
 public interface ChatClient {
     // 流式API设计
     PromptSpec prompt();
+
     PromptSpec prompt(String text);
 
     interface PromptSpec {
         MessageSpec system(String text);
+
         MessageSpec user(String text);
+
         CallSpec call();
+
         StreamSpec stream();
     }
 
     interface CallSpec {
         ChatResponse chatResponse();
+
         String content();
+
         <T> T entity(Class<T> entityClass);
     }
 }
@@ -234,49 +247,51 @@ public interface ChatClient {
 **完整示例：**
 
 ```java
+
 @Service
 public class ChatService {
     private final ChatClient chatClient;
 
     public ChatService(ChatClient.Builder builder) {
         this.chatClient = builder
-            .defaultAdvisors(
-                new LoggingAdvisor(),
-                new SecurityAdvisor(),
-                new RAGAdvisor()
-            )
-            .build();
+                .defaultAdvisors(
+                        new LoggingAdvisor(),
+                        new SecurityAdvisor(),
+                        new RAGAdvisor()
+                )
+                .build();
     }
 
     // 同步调用
     public String simpleChat(String message) {
         return chatClient.prompt(message)
-            .call()
-            .content();
+                .call()
+                .content();
     }
 
     // 结构化输出
     public WeatherReport getWeatherReport(String city) {
         return chatClient.prompt()
-            .system("你是一个天气分析专家")
-            .user("分析{city}的天气情况", Map.of("city", city))
-            .call()
-            .entity(WeatherReport.class);
+                .system("你是一个天气分析专家")
+                .user("分析{city}的天气情况", Map.of("city", city))
+                .call()
+                .entity(WeatherReport.class);
     }
 
     // 流式响应
     public Flux<String> streamChat(String message) {
         return chatClient.prompt(message)
-            .stream()
-            .content();
+                .stream()
+                .content();
     }
 
     public record WeatherReport(
-        String city,
-        String temperature,
-        String condition,
-        List<String> recommendations
-    ) {}
+            String city,
+            String temperature,
+            String condition,
+            List<String> recommendations
+    ) {
+    }
 }
 ```
 
@@ -317,6 +332,7 @@ public interface VectorStore {
 **完整实现示例：**
 
 ```java
+
 @Service
 public class DocumentService {
     private final VectorStore vectorStore;
@@ -350,11 +366,11 @@ public class DocumentService {
     // 相似性搜索
     public List<Document> searchSimilarDocuments(String query, int topK) {
         SearchRequest request = SearchRequest.builder()
-            .query(query)
-            .topK(topK)
-            .similarityThreshold(0.7)
-            .filterExpression("source != 'temp'")
-            .build();
+                .query(query)
+                .topK(topK)
+                .similarityThreshold(0.7)
+                .filterExpression("source != 'temp'")
+                .build();
 
         return vectorStore.similaritySearch(request);
     }
@@ -364,16 +380,16 @@ public class DocumentService {
         FilterExpressionBuilder builder = new FilterExpressionBuilder();
 
         Expression filterExpression = builder.and(
-            filters.entrySet().stream()
-                .map(entry -> builder.eq(entry.getKey(), entry.getValue()))
-                .toArray(Expression[]::new)
+                filters.entrySet().stream()
+                        .map(entry -> builder.eq(entry.getKey(), entry.getValue()))
+                        .toArray(Expression[]::new)
         ).build();
 
         SearchRequest request = SearchRequest.builder()
-            .query(query)
-            .topK(10)
-            .filterExpression(filterExpression)
-            .build();
+                .query(query)
+                .topK(10)
+                .filterExpression(filterExpression)
+                .build();
 
         return vectorStore.similaritySearch(request);
     }
@@ -382,14 +398,14 @@ public class DocumentService {
 
 **向量存储选择指南：**
 
-| 数据库 | 适用场景 | 优势 | 劣势 |
-|--------|----------|------|------|
-| Redis | 中小型应用 | 简单易用，性能好 | 内存限制 |
-| Elasticsearch | 企业级应用 | 功能丰富，可扩展 | 复杂度高 |
-| PGVector | 关系型数据 | 与现有数据库集成，支持PostgreSQL 17 | 性能一般 |
-| Pinecone | 云端应用 | 专业向量数据库 | 成本较高 |
-| Oracle | 企业级应用 | 企业级特性，高性能 | 成本高，复杂度高 |
-| Neo4j | 图数据库应用 | 图关系查询，知识图谱 | 学习成本高 |
+| 数据库           | 适用场景   | 优势                       | 劣势       |
+|---------------|--------|--------------------------|----------|
+| Redis         | 中小型应用  | 简单易用，性能好                 | 内存限制     |
+| Elasticsearch | 企业级应用  | 功能丰富，可扩展                 | 复杂度高     |
+| PGVector      | 关系型数据  | 与现有数据库集成，支持PostgreSQL 17 | 性能一般     |
+| Pinecone      | 云端应用   | 专业向量数据库                  | 成本较高     |
+| Oracle        | 企业级应用  | 企业级特性，高性能                | 成本高，复杂度高 |
+| Neo4j         | 图数据库应用 | 图关系查询，知识图谱               | 学习成本高    |
 
 ### 2.3 Embedding Models嵌入模型的集成方式
 
@@ -413,6 +429,7 @@ public interface EmbeddingModel extends Model<EmbeddingRequest, EmbeddingRespons
 **集成实现：**
 
 ```java
+
 @Configuration
 public class EmbeddingConfiguration {
 
@@ -421,9 +438,9 @@ public class EmbeddingConfiguration {
     @ConditionalOnProperty("spring.ai.openai.embedding.enabled")
     public EmbeddingModel openAiEmbeddingModel() {
         return new OpenAiEmbeddingModel(openAiApi,
-            OpenAiEmbeddingOptions.builder()
-                .model("text-embedding-3-large")
-                .build());
+                OpenAiEmbeddingOptions.builder()
+                        .model("text-embedding-3-large")
+                        .build());
     }
 
     // Azure OpenAI嵌入模型
@@ -431,9 +448,9 @@ public class EmbeddingConfiguration {
     @ConditionalOnProperty("spring.ai.azure.openai.embedding.enabled")
     public EmbeddingModel azureEmbeddingModel() {
         return new AzureOpenAiEmbeddingModel(azureOpenAiApi,
-            AzureOpenAiEmbeddingOptions.builder()
-                .deploymentName("text-embedding-ada-002")
-                .build());
+                AzureOpenAiEmbeddingOptions.builder()
+                        .deploymentName("text-embedding-ada-002")
+                        .build());
     }
 
     // Ollama本地嵌入模型
@@ -441,9 +458,9 @@ public class EmbeddingConfiguration {
     @ConditionalOnProperty("spring.ai.ollama.embedding.enabled")
     public EmbeddingModel ollamaEmbeddingModel() {
         return new OllamaEmbeddingModel(ollamaApi,
-            OllamaOptions.builder()
-                .model("nomic-embed-text")
-                .build());
+                OllamaOptions.builder()
+                        .model("nomic-embed-text")
+                        .build());
     }
 }
 ```
@@ -451,6 +468,7 @@ public class EmbeddingConfiguration {
 **使用示例：**
 
 ```java
+
 @Service
 public class EmbeddingService {
     private final EmbeddingModel embeddingModel;
@@ -464,8 +482,8 @@ public class EmbeddingService {
     public List<List<Double>> embedTexts(List<String> texts) {
         EmbeddingResponse response = embeddingModel.embedForResponse(texts);
         return response.getResults().stream()
-            .map(embedding -> embedding.getOutput())
-            .collect(Collectors.toList());
+                .map(embedding -> embedding.getOutput())
+                .collect(Collectors.toList());
     }
 
     // 文档相似度计算
@@ -512,8 +530,8 @@ public class WeatherService {
 
     @Tool(description = "获取指定城市的天气信息")
     public WeatherInfo getWeather(
-        @Parameter(description = "城市名称") String city,
-        @Parameter(description = "温度单位", required = false) String unit
+            @Parameter(description = "城市名称") String city,
+            @Parameter(description = "温度单位", required = false) String unit
     ) {
         // 调用外部天气API
         return weatherApiClient.getWeather(city, unit);
@@ -525,17 +543,19 @@ public class WeatherService {
     }
 
     public record WeatherInfo(
-        String city,
-        double temperature,
-        String condition,
-        int humidity
-    ) {}
+            String city,
+            double temperature,
+            String condition,
+            int humidity
+    ) {
+    }
 
     public record WeatherAlert(
-        String type,
-        String severity,
-        String description
-    ) {}
+            String type,
+            String severity,
+            String description
+    ) {
+    }
 }
 
 // 2. 工具注册配置
@@ -545,19 +565,19 @@ public class ToolConfiguration {
     @Bean
     public ToolCallbackProvider weatherTools(WeatherService weatherService) {
         return MethodToolCallbackProvider.builder()
-            .toolObjects(weatherService)
-            .build();
+                .toolObjects(weatherService)
+                .build();
     }
 
     // 自定义工具回调
     @Bean
     public ToolCallback customToolCallback() {
         return ToolCallback.builder()
-            .name("database_query")
-            .description("执行数据库查询")
-            .inputTypeSchema(DatabaseQuery.class)
-            .function(this::executeQuery)
-            .build();
+                .name("database_query")
+                .description("执行数据库查询")
+                .inputTypeSchema(DatabaseQuery.class)
+                .function(this::executeQuery)
+                .build();
     }
 
     private String executeQuery(DatabaseQuery query) {
@@ -565,7 +585,8 @@ public class ToolConfiguration {
         return jdbcTemplate.queryForObject(query.sql(), String.class, query.params());
     }
 
-    public record DatabaseQuery(String sql, Object[] params) {}
+    public record DatabaseQuery(String sql, Object[] params) {
+    }
 }
 
 // 3. 使用工具调用
@@ -574,21 +595,21 @@ public class WeatherChatService {
     private final ChatClient chatClient;
 
     public WeatherChatService(ChatClient.Builder builder,
-                             List<ToolCallback> toolCallbacks) {
+                              List<ToolCallback> toolCallbacks) {
         this.chatClient = builder
-            .defaultToolCallbacks(toolCallbacks)
-            .build();
+                .defaultToolCallbacks(toolCallbacks)
+                .build();
     }
 
     public String getWeatherAdvice(String userQuery) {
         return chatClient.prompt()
-            .system("""
-                你是一个天气助手。当用户询问天气时，使用getWeather工具获取实时天气信息。
-                如果有恶劣天气，使用getWeatherAlerts工具获取预警信息。
-                """)
-            .user(userQuery)
-            .call()
-            .content();
+                .system("""
+                        你是一个天气助手。当用户询问天气时，使用getWeather工具获取实时天气信息。
+                        如果有恶劣天气，使用getWeatherAlerts工具获取预警信息。
+                        """)
+                .user(userQuery)
+                .call()
+                .content();
     }
 }
 ```
@@ -621,6 +642,7 @@ public interface StreamAdvisor extends Advisor {
 // 基础接口
 public interface Advisor {
     String getName();
+
     int getOrder(); // 执行顺序
 }
 ```
@@ -660,7 +682,7 @@ public class LoggingAdvisor implements CallAdvisor, StreamAdvisor {
         logger.info("AI流式请求开始: {}", request.getPrompt().getInstructions());
 
         return chain.nextStream(request)
-            .doOnComplete(() -> logger.info("AI流式请求完成"));
+                .doOnComplete(() -> logger.info("AI流式请求完成"));
     }
 }
 
@@ -668,9 +690,9 @@ public class LoggingAdvisor implements CallAdvisor, StreamAdvisor {
 @Component
 public class SecurityAdvisor implements CallAdvisor {
     private final List<String> sensitivePatterns = List.of(
-        "\\b\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b", // 信用卡号
-        "\\b\\d{3}-\\d{2}-\\d{4}\\b", // SSN
-        "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b" // 邮箱
+            "\\b\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b", // 信用卡号
+            "\\b\\d{3}-\\d{2}-\\d{4}\\b", // SSN
+            "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b" // 邮箱
     );
 
     @Override
@@ -706,7 +728,7 @@ public class SecurityAdvisor implements CallAdvisor {
 
     private boolean containsSensitiveInfo(String text) {
         return sensitivePatterns.stream()
-            .anyMatch(pattern -> text.matches(".*" + pattern + ".*"));
+                .anyMatch(pattern -> text.matches(".*" + pattern + ".*"));
     }
 
     private String maskSensitiveInfo(String text) {
@@ -734,18 +756,18 @@ public class MetricsAdvisor implements CallAdvisor {
             // 记录成功指标
             meterRegistry.counter("ai.requests.success").increment();
             sample.stop(Timer.builder("ai.request.duration")
-                .tag("status", "success")
-                .register(meterRegistry));
+                    .tag("status", "success")
+                    .register(meterRegistry));
 
             return response;
         } catch (Exception e) {
             // 记录失败指标
             meterRegistry.counter("ai.requests.error")
-                .tag("error", e.getClass().getSimpleName())
-                .increment();
+                    .tag("error", e.getClass().getSimpleName())
+                    .increment();
             sample.stop(Timer.builder("ai.request.duration")
-                .tag("status", "error")
-                .register(meterRegistry));
+                    .tag("status", "error")
+                    .register(meterRegistry));
             throw e;
         }
     }
@@ -755,19 +777,20 @@ public class MetricsAdvisor implements CallAdvisor {
 **Advisor链执行顺序：**
 
 ```java
+
 @Configuration
 public class AdvisorConfiguration {
 
     @Bean
     public ChatClient chatClient(ChatClient.Builder builder) {
         return builder
-            .defaultAdvisors(
-                new SecurityAdvisor(),      // Order: 100
-                new LoggingAdvisor(),       // Order: HIGHEST_PRECEDENCE
-                new MetricsAdvisor(),       // Order: 200
-                new RAGAdvisor()            // Order: 300
-            )
-            .build();
+                .defaultAdvisors(
+                        new SecurityAdvisor(),      // Order: 100
+                        new LoggingAdvisor(),       // Order: HIGHEST_PRECEDENCE
+                        new MetricsAdvisor(),       // Order: 200
+                        new RAGAdvisor()            // Order: 300
+                )
+                .build();
     }
 }
 ```
@@ -1070,20 +1093,21 @@ app:
 **手动配置 PgVectorStore Bean：**
 
 ```java
+
 @Configuration
 public class VectorStoreConfiguration {
 
     @Bean
     public VectorStore vectorStore(JdbcTemplate jdbcTemplate, EmbeddingModel embeddingModel) {
         return PgVectorStore.builder(jdbcTemplate, embeddingModel)
-            .dimensions(1536)                    // OpenAI embedding dimensions
-            .distanceType(PgVectorStore.PgDistanceType.COSINE_DISTANCE)
-            .indexType(PgVectorStore.PgIndexType.HNSW)
-            .initializeSchema(true)              // 自动创建表和索引
-            .schemaName("public")
-            .vectorTableName("vector_store")
-            .maxDocumentBatchSize(10000)
-            .build();
+                .dimensions(1536)                    // OpenAI embedding dimensions
+                .distanceType(PgVectorStore.PgDistanceType.COSINE_DISTANCE)
+                .indexType(PgVectorStore.PgIndexType.HNSW)
+                .initializeSchema(true)              // 自动创建表和索引
+                .schemaName("public")
+                .vectorTableName("vector_store")
+                .maxDocumentBatchSize(10000)
+                .build();
     }
 }
 ```
@@ -1091,6 +1115,7 @@ public class VectorStoreConfiguration {
 **环境特定配置：**
 
 **开发环境（application-dev.yml）：**
+
 ```yaml
 # 开发环境覆盖配置
 spring:
@@ -1114,6 +1139,7 @@ logging:
 ```
 
 **测试环境（application-test.yml）：**
+
 ```yaml
 # 测试环境覆盖配置
 spring:
@@ -1133,6 +1159,7 @@ logging:
 ```
 
 **生产环境（application-prod.yml）：**
+
 ```yaml
 # 生产环境覆盖配置
 spring:
@@ -1172,7 +1199,7 @@ services:
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -1342,7 +1369,7 @@ public class ChatClientAutoConfiguration {
 
         // 自动注入Advisors
         advisors.ifAvailable(advisorList ->
-            builder.defaultAdvisors(advisorList.toArray(new Advisor[0])));
+                builder.defaultAdvisors(advisorList.toArray(new Advisor[0])));
 
         return builder;
     }
@@ -1366,9 +1393,9 @@ public class OpenAiAutoConfiguration {
     @ConditionalOnMissingBean
     public OpenAiApi openAiApi(OpenAiProperties properties) {
         return OpenAiApi.builder()
-            .apiKey(properties.getApiKey())
-            .baseUrl(properties.getBaseUrl())
-            .build();
+                .apiKey(properties.getApiKey())
+                .baseUrl(properties.getBaseUrl())
+                .build();
     }
 
     @Bean
@@ -1400,14 +1427,14 @@ public class PgVectorStoreAutoConfiguration {
             PgVectorStoreProperties properties) {
 
         return PgVectorStore.builder(jdbcTemplate, embeddingModel)
-            .dimensions(properties.getDimensions())
-            .distanceType(properties.getDistanceType())
-            .indexType(properties.getIndexType())
-            .initializeSchema(properties.isInitializeSchema())
-            .schemaName(properties.getSchemaName())
-            .vectorTableName(properties.getTableName())
-            .maxDocumentBatchSize(properties.getMaxDocumentBatchSize())
-            .build();
+                .dimensions(properties.getDimensions())
+                .distanceType(properties.getDistanceType())
+                .indexType(properties.getIndexType())
+                .initializeSchema(properties.isInitializeSchema())
+                .schemaName(properties.getSchemaName())
+                .vectorTableName(properties.getTableName())
+                .maxDocumentBatchSize(properties.getMaxDocumentBatchSize())
+                .build();
     }
 }
 ```
@@ -1416,23 +1443,23 @@ public class PgVectorStoreAutoConfiguration {
 
 **ChatModel配置参数：**
 
-| 参数 | 说明 | 默认值 | 示例 |
-|------|------|--------|------|
-| model | 模型名称 | gpt-4o | gpt-4o, claude-3-5-sonnet |
-| temperature | 随机性控制 | 0.7 | 0.0-2.0 |
-| max-tokens | 最大输出长度 | 2000 | 100-4000 |
-| top-p | 核采样参数 | 1.0 | 0.1-1.0 |
-| frequency-penalty | 频率惩罚 | 0.0 | -2.0-2.0 |
-| presence-penalty | 存在惩罚 | 0.0 | -2.0-2.0 |
+| 参数                | 说明     | 默认值    | 示例                        |
+|-------------------|--------|--------|---------------------------|
+| model             | 模型名称   | gpt-4o | gpt-4o, claude-3-5-sonnet |
+| temperature       | 随机性控制  | 0.7    | 0.0-2.0                   |
+| max-tokens        | 最大输出长度 | 2000   | 100-4000                  |
+| top-p             | 核采样参数  | 1.0    | 0.1-1.0                   |
+| frequency-penalty | 频率惩罚   | 0.0    | -2.0-2.0                  |
+| presence-penalty  | 存在惩罚   | 0.0    | -2.0-2.0                  |
 
 **VectorStore配置参数：**
 
-| 参数 | 说明 | 默认值 | 示例 |
-|------|------|--------|------|
-| index | 索引名称 | spring-ai | documents, knowledge-base |
-| prefix | 键前缀 | doc: | app:, kb: |
-| similarity-threshold | 相似度阈值 | 0.7 | 0.5-0.9 |
-| top-k | 返回结果数量 | 5 | 1-20 |
+| 参数                   | 说明     | 默认值       | 示例                        |
+|----------------------|--------|-----------|---------------------------|
+| index                | 索引名称   | spring-ai | documents, knowledge-base |
+| prefix               | 键前缀    | doc:      | app:, kb:                 |
+| similarity-threshold | 相似度阈值  | 0.7       | 0.5-0.9                   |
+| top-k                | 返回结果数量 | 5         | 1-20                      |
 
 **完整配置示例：**
 
@@ -1473,7 +1500,8 @@ spring:
         enabled: true
         uri: redis://localhost:6379
         index: spring-ai-docs
-        prefix: doc:
+        prefix:
+          doc:
         similarity-threshold: 0.75
         top-k: 10
 
@@ -1519,9 +1547,10 @@ cd spring-ai-demo
 在`pom.xml`中添加：
 
 ```xml
+
 <dependency>
-   <groupId>org.springframework.ai</groupId>
-   <artifactId>spring-ai-starter-model-openai</artifactId>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-starter-model-openai</artifactId>
 </dependency>
 ```
 
@@ -1559,8 +1588,8 @@ public class ChatService {
 
     public String chat(String message) {
         return chatClient.prompt(message)
-            .call()
-            .content();
+                .call()
+                .content();
     }
 }
 ```
@@ -1627,6 +1656,7 @@ curl -X POST http://localhost:8080/api/chat \
 **ChatClient API最佳实践：**
 
 ```java
+
 @Service
 public class AdvancedChatService {
 
@@ -1634,67 +1664,68 @@ public class AdvancedChatService {
 
     public AdvancedChatService(ChatClient.Builder builder) {
         this.chatClient = builder
-            .defaultAdvisors(
-                new LoggingAdvisor(),
-                new SecurityAdvisor()
-            )
-            .build();
+                .defaultAdvisors(
+                        new LoggingAdvisor(),
+                        new SecurityAdvisor()
+                )
+                .build();
     }
 
     // 1. 基础对话
     public String simpleChat(String message) {
         return chatClient.prompt(message)
-            .call()
-            .content();
+                .call()
+                .content();
     }
 
     // 2. 带系统提示的对话
     public String chatWithSystem(String userMessage, String systemPrompt) {
         return chatClient.prompt()
-            .system(systemPrompt)
-            .user(userMessage)
-            .call()
-            .content();
+                .system(systemPrompt)
+                .user(userMessage)
+                .call()
+                .content();
     }
 
     // 3. 参数化提示
     public String chatWithParams(String template, Map<String, Object> params) {
         return chatClient.prompt()
-            .user(u -> u.text(template).params(params))
-            .call()
-            .content();
+                .user(u -> u.text(template).params(params))
+                .call()
+                .content();
     }
 
     // 4. 结构化输出
     public WeatherReport getWeatherReport(String city) {
         return chatClient.prompt()
-            .system("你是一个天气分析专家，返回JSON格式的天气报告")
-            .user("分析{city}的天气情况", Map.of("city", city))
-            .call()
-            .entity(WeatherReport.class);
+                .system("你是一个天气分析专家，返回JSON格式的天气报告")
+                .user("分析{city}的天气情况", Map.of("city", city))
+                .call()
+                .entity(WeatherReport.class);
     }
 
     // 5. 流式响应
     public Flux<String> streamChat(String message) {
         return chatClient.prompt(message)
-            .stream()
-            .content();
+                .stream()
+                .content();
     }
 
     // 6. 带工具调用的对话
     public String chatWithTools(String message, List<ToolCallback> tools) {
         return chatClient.prompt(message)
-            .toolCallbacks(tools)
-            .call()
-            .content();
+                .toolCallbacks(tools)
+                .call()
+                .content();
     }
 
     public record WeatherReport(
-        String city,
-        String temperature,
-        String condition,
-        List<String> recommendations
-    ) {}
+            String city,
+            String temperature,
+            String condition,
+            List<String> recommendations
+    ) {
+    }
 }
 ```
 
@@ -1720,16 +1751,16 @@ public class RAGService {
     private final TextSplitter textSplitter;
 
     public RAGService(VectorStore vectorStore,
-                     ChatClient.Builder builder,
-                     DocumentReader documentReader) {
+                      ChatClient.Builder builder,
+                      DocumentReader documentReader) {
         this.vectorStore = vectorStore;
         this.documentReader = documentReader;
         this.textSplitter = new TokenTextSplitter(1000, 200);
 
         // 配置RAG Advisor (Spring AI 1.0)
         this.chatClient = builder
-            .defaultAdvisors(QuestionAnswerAdvisor.builder(vectorStore).build())
-            .build();
+                .defaultAdvisors(QuestionAnswerAdvisor.builder(vectorStore).build())
+                .build();
     }
 
     // 添加文档到知识库
@@ -1760,13 +1791,13 @@ public class RAGService {
     // RAG查询
     public String queryKnowledgeBase(String question) {
         return chatClient.prompt()
-            .system("""
-                你是一个知识库助手。请基于提供的上下文信息回答用户问题。
-                如果上下文中没有相关信息，请明确说明。
-                """)
-            .user(question)
-            .call()
-            .content();
+                .system("""
+                        你是一个知识库助手。请基于提供的上下文信息回答用户问题。
+                        如果上下文中没有相关信息，请明确说明。
+                        """)
+                .user(question)
+                .call()
+                .content();
     }
 
     // 带过滤的RAG查询
@@ -1774,30 +1805,30 @@ public class RAGService {
         // 构建过滤表达式
         FilterExpressionBuilder builder = new FilterExpressionBuilder();
         Expression filterExpression = builder.and(
-            filters.entrySet().stream()
-                .map(entry -> builder.eq(entry.getKey(), entry.getValue()))
-                .toArray(Expression[]::new)
+                filters.entrySet().stream()
+                        .map(entry -> builder.eq(entry.getKey(), entry.getValue()))
+                        .toArray(Expression[]::new)
         ).build();
 
         // 检索相关文档
         List<Document> relevantDocs = vectorStore.similaritySearch(
-            SearchRequest.builder()
-                .query(question)
-                .topK(5)
-                .filterExpression(filterExpression)
-                .build()
+                SearchRequest.builder()
+                        .query(question)
+                        .topK(5)
+                        .filterExpression(filterExpression)
+                        .build()
         );
 
         // 构建上下文
         String context = relevantDocs.stream()
-            .map(Document::getContent)
-            .collect(Collectors.joining("\n\n"));
+                .map(Document::getContent)
+                .collect(Collectors.joining("\n\n"));
 
         return chatClient.prompt()
-            .system("基于以下上下文回答问题：\n" + context)
-            .user(question)
-            .call()
-            .content();
+                .system("基于以下上下文回答问题：\n" + context)
+                .user(question)
+                .call()
+                .content();
     }
 
     private String getDocumentType(Resource resource) {
@@ -1817,6 +1848,7 @@ public class RAGService {
 **智能聊天机器人实现：**
 
 ```java
+
 @Service
 public class ChatBotService {
 
@@ -1825,46 +1857,46 @@ public class ChatBotService {
     private final List<ToolCallback> toolCallbacks;
 
     public ChatBotService(ChatClient.Builder builder,
-                         ConversationMemory conversationMemory,
-                         List<ToolCallback> toolCallbacks) {
+                          ConversationMemory conversationMemory,
+                          List<ToolCallback> toolCallbacks) {
         this.conversationMemory = conversationMemory;
         this.toolCallbacks = toolCallbacks;
 
         this.chatClient = builder
-            .defaultAdvisors(
-                new ConversationMemoryAdvisor(conversationMemory),
-                new LoggingAdvisor()
-            )
-            .defaultToolCallbacks(toolCallbacks)
-            .build();
+                .defaultAdvisors(
+                        new ConversationMemoryAdvisor(conversationMemory),
+                        new LoggingAdvisor()
+                )
+                .defaultToolCallbacks(toolCallbacks)
+                .build();
     }
 
     // 处理用户消息
     public ChatResponse chat(String sessionId, String userMessage) {
         return chatClient.prompt()
-            .system("""
-                你是一个友好的AI助手。你可以：
-                1. 回答各种问题
-                2. 查询天气信息
-                3. 搜索相关资料
-                4. 执行简单的计算
-
-                请保持对话的连贯性，记住之前的对话内容。
-                """)
-            .user(userMessage)
-            .advisors(a -> a.param("sessionId", sessionId))
-            .call()
-            .chatResponse();
+                .system("""
+                        你是一个友好的AI助手。你可以：
+                        1. 回答各种问题
+                        2. 查询天气信息
+                        3. 搜索相关资料
+                        4. 执行简单的计算
+                        
+                        请保持对话的连贯性，记住之前的对话内容。
+                        """)
+                .user(userMessage)
+                .advisors(a -> a.param("sessionId", sessionId))
+                .call()
+                .chatResponse();
     }
 
     // 流式聊天
     public Flux<String> streamChat(String sessionId, String userMessage) {
         return chatClient.prompt()
-            .system("你是一个AI助手，请提供有帮助的回答。")
-            .user(userMessage)
-            .advisors(a -> a.param("sessionId", sessionId))
-            .stream()
-            .content();
+                .system("你是一个AI助手，请提供有帮助的回答。")
+                .user(userMessage)
+                .advisors(a -> a.param("sessionId", sessionId))
+                .stream()
+                .content();
     }
 
     // 获取对话历史
@@ -1890,8 +1922,8 @@ public class ConversationMemory {
     public List<Message> get(String sessionId, int limit) {
         List<Message> messages = conversations.getOrDefault(sessionId, new ArrayList<>());
         return messages.stream()
-            .skip(Math.max(0, messages.size() - limit))
-            .collect(Collectors.toList());
+                .skip(Math.max(0, messages.size() - limit))
+                .collect(Collectors.toList());
     }
 
     public void clear(String sessionId) {
@@ -1905,6 +1937,7 @@ public class ConversationMemory {
 **智能文档分析系统：**
 
 ```java
+
 @Service
 public class DocumentAnalysisService {
 
@@ -1914,7 +1947,7 @@ public class DocumentAnalysisService {
     private final VectorStore vectorStore;
 
     public DocumentAnalysisService(ChatClient.Builder builder,
-                                  VectorStore vectorStore) {
+                                   VectorStore vectorStore) {
         this.chatClient = builder.build();
         this.vectorStore = vectorStore;
         this.pdfReader = new PagePdfDocumentReader();
@@ -1925,62 +1958,62 @@ public class DocumentAnalysisService {
     public DocumentSummary generateSummary(Resource document) {
         List<Document> docs = readDocument(document);
         String content = docs.stream()
-            .map(Document::getContent)
-            .collect(Collectors.joining("\n"));
+                .map(Document::getContent)
+                .collect(Collectors.joining("\n"));
 
         return chatClient.prompt()
-            .system("""
-                请为以下文档生成结构化摘要，包括：
-                1. 主要内容概述
-                2. 关键要点列表
-                3. 重要结论
-                4. 建议的后续行动
-                """)
-            .user("文档内容：\n" + content)
-            .call()
-            .entity(DocumentSummary.class);
+                .system("""
+                        请为以下文档生成结构化摘要，包括：
+                        1. 主要内容概述
+                        2. 关键要点列表
+                        3. 重要结论
+                        4. 建议的后续行动
+                        """)
+                .user("文档内容：\n" + content)
+                .call()
+                .entity(DocumentSummary.class);
     }
 
     // 文档问答
     public String answerQuestion(Resource document, String question) {
         List<Document> docs = readDocument(document);
         String content = docs.stream()
-            .map(Document::getContent)
-            .collect(Collectors.joining("\n"));
+                .map(Document::getContent)
+                .collect(Collectors.joining("\n"));
 
         return chatClient.prompt()
-            .system("基于提供的文档内容回答用户问题。如果文档中没有相关信息，请明确说明。")
-            .user("文档内容：\n" + content + "\n\n问题：" + question)
-            .call()
-            .content();
+                .system("基于提供的文档内容回答用户问题。如果文档中没有相关信息，请明确说明。")
+                .user("文档内容：\n" + content + "\n\n问题：" + question)
+                .call()
+                .content();
     }
 
     // 批量文档处理
     public List<DocumentAnalysisResult> batchAnalyze(List<Resource> documents) {
         return documents.parallelStream()
-            .map(this::analyzeDocument)
-            .collect(Collectors.toList());
+                .map(this::analyzeDocument)
+                .collect(Collectors.toList());
     }
 
     // 文档分类
     public DocumentClassification classifyDocument(Resource document) {
         List<Document> docs = readDocument(document);
         String content = docs.stream()
-            .limit(3) // 只使用前3页进行分类
-            .map(Document::getContent)
-            .collect(Collectors.joining("\n"));
+                .limit(3) // 只使用前3页进行分类
+                .map(Document::getContent)
+                .collect(Collectors.joining("\n"));
 
         return chatClient.prompt()
-            .system("""
-                请分析文档类型和主题，返回分类结果：
-                - 文档类型：合同、报告、手册、政策等
-                - 主题领域：技术、财务、法律、人力资源等
-                - 重要程度：高、中、低
-                - 处理优先级：紧急、正常、低优先级
-                """)
-            .user("文档内容：\n" + content)
-            .call()
-            .entity(DocumentClassification.class);
+                .system("""
+                        请分析文档类型和主题，返回分类结果：
+                        - 文档类型：合同、报告、手册、政策等
+                        - 主题领域：技术、财务、法律、人力资源等
+                        - 重要程度：高、中、低
+                        - 处理优先级：紧急、正常、低优先级
+                        """)
+                .user("文档内容：\n" + content)
+                .call()
+                .entity(DocumentClassification.class);
     }
 
     private List<Document> readDocument(Resource resource) {
@@ -1998,44 +2031,47 @@ public class DocumentAnalysisService {
             DocumentClassification classification = classifyDocument(document);
 
             return new DocumentAnalysisResult(
-                document.getFilename(),
-                summary,
-                classification,
-                "SUCCESS",
-                null
+                    document.getFilename(),
+                    summary,
+                    classification,
+                    "SUCCESS",
+                    null
             );
         } catch (Exception e) {
             return new DocumentAnalysisResult(
-                document.getFilename(),
-                null,
-                null,
-                "ERROR",
-                e.getMessage()
+                    document.getFilename(),
+                    null,
+                    null,
+                    "ERROR",
+                    e.getMessage()
             );
         }
     }
 
     public record DocumentSummary(
-        String overview,
-        List<String> keyPoints,
-        String conclusion,
-        List<String> recommendations
-    ) {}
+            String overview,
+            List<String> keyPoints,
+            String conclusion,
+            List<String> recommendations
+    ) {
+    }
 
     public record DocumentClassification(
-        String documentType,
-        String subject,
-        String importance,
-        String priority
-    ) {}
+            String documentType,
+            String subject,
+            String importance,
+            String priority
+    ) {
+    }
 
     public record DocumentAnalysisResult(
-        String filename,
-        DocumentSummary summary,
-        DocumentClassification classification,
-        String status,
-        String error
-    ) {}
+            String filename,
+            DocumentSummary summary,
+            DocumentClassification classification,
+            String status,
+            String error
+    ) {
+    }
 }
 ```
 
@@ -2044,6 +2080,7 @@ public class DocumentAnalysisService {
 **统一错误处理：**
 
 ```java
+
 @ControllerAdvice
 public class AIExceptionHandler {
 
@@ -2054,9 +2091,9 @@ public class AIExceptionHandler {
         logger.error("OpenAI API错误: {}", e.getMessage(), e);
 
         ErrorResponse error = new ErrorResponse(
-            "AI_API_ERROR",
-            "AI服务暂时不可用，请稍后重试",
-            e.getMessage()
+                "AI_API_ERROR",
+                "AI服务暂时不可用，请稍后重试",
+                e.getMessage()
         );
 
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
@@ -2067,9 +2104,9 @@ public class AIExceptionHandler {
         logger.warn("API调用频率限制: {}", e.getMessage());
 
         ErrorResponse error = new ErrorResponse(
-            "RATE_LIMIT_EXCEEDED",
-            "请求过于频繁，请稍后重试",
-            null
+                "RATE_LIMIT_EXCEEDED",
+                "请求过于频繁，请稍后重试",
+                null
         );
 
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error);
@@ -2080,19 +2117,20 @@ public class AIExceptionHandler {
         logger.error("向量存储错误: {}", e.getMessage(), e);
 
         ErrorResponse error = new ErrorResponse(
-            "VECTOR_STORE_ERROR",
-            "知识库服务异常",
-            e.getMessage()
+                "VECTOR_STORE_ERROR",
+                "知识库服务异常",
+                e.getMessage()
         );
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
     public record ErrorResponse(
-        String code,
-        String message,
-        String details
-    ) {}
+            String code,
+            String message,
+            String details
+    ) {
+    }
 }
 
 // 重试配置
@@ -2103,10 +2141,10 @@ public class RetryConfiguration {
     @Bean
     public RetryTemplate retryTemplate() {
         return RetryTemplate.builder()
-            .maxAttempts(3)
-            .exponentialBackoff(1000, 2, 10000)
-            .retryOn(OpenAiApiException.class)
-            .build();
+                .maxAttempts(3)
+                .exponentialBackoff(1000, 2, 10000)
+                .retryOn(OpenAiApiException.class)
+                .build();
     }
 }
 
@@ -2118,14 +2156,14 @@ public class ResilientChatService {
     private final RetryTemplate retryTemplate;
 
     @Retryable(
-        value = {OpenAiApiException.class},
-        maxAttempts = 3,
-        backoff = @Backoff(delay = 1000, multiplier = 2)
+            value = {OpenAiApiException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
     )
     public String chatWithRetry(String message) {
         return chatClient.prompt(message)
-            .call()
-            .content();
+                .call()
+                .content();
     }
 
     @Recover
@@ -2226,7 +2264,7 @@ public class CacheAdvisor implements CallAdvisor {
 public class ContentFilterAdvisor implements CallAdvisor {
 
     private final List<String> bannedWords = List.of(
-        "暴力", "仇恨", "歧视", "违法"
+            "暴力", "仇恨", "歧视", "违法"
     );
 
     @Override
@@ -2251,15 +2289,15 @@ public class ContentFilterAdvisor implements CallAdvisor {
 
     private boolean containsBannedContent(String text) {
         return bannedWords.stream()
-            .anyMatch(word -> text.toLowerCase().contains(word.toLowerCase()));
+                .anyMatch(word -> text.toLowerCase().contains(word.toLowerCase()));
     }
 
     private ChatClientResponse createSafeResponse(ChatClientResponse original) {
         // 创建安全的替代响应
         return ChatClientResponse.builder()
-            .from(original)
-            .withContent("抱歉，我无法提供相关信息。请换个话题。")
-            .build();
+                .from(original)
+                .withContent("抱歉，我无法提供相关信息。请换个话题。")
+                .build();
     }
 }
 
@@ -2284,8 +2322,8 @@ public class MultiLanguageAdvisor implements CallAdvisor {
 
             // 将响应翻译回原语言
             String translatedResponse = translateFromEnglish(
-                response.getResult().getOutput().getContent(),
-                detectedLanguage
+                    response.getResult().getOutput().getContent(),
+                    detectedLanguage
             );
 
             return modifyResponse(response, translatedResponse);
@@ -2296,18 +2334,18 @@ public class MultiLanguageAdvisor implements CallAdvisor {
 
     private String translateToEnglish(String text) {
         return translationClient.prompt()
-            .system("将以下文本翻译为英文")
-            .user(text)
-            .call()
-            .content();
+                .system("将以下文本翻译为英文")
+                .user(text)
+                .call()
+                .content();
     }
 
     private String translateFromEnglish(String text, String targetLanguage) {
         return translationClient.prompt()
-            .system("将以下英文翻译为" + getLanguageName(targetLanguage))
-            .user(text)
-            .call()
-            .content();
+                .system("将以下英文翻译为" + getLanguageName(targetLanguage))
+                .user(text)
+                .call()
+                .content();
     }
 }
 ```
@@ -2317,6 +2355,7 @@ public class MultiLanguageAdvisor implements CallAdvisor {
 **多模型配置：**
 
 ```java
+
 @Configuration
 public class MultiModelConfiguration {
 
@@ -2325,9 +2364,9 @@ public class MultiModelConfiguration {
     @Qualifier("openai")
     public ChatClient openAiChatClient(@Qualifier("openai") ChatModel openAiModel) {
         return ChatClient.builder()
-            .chatModel(openAiModel)
-            .defaultAdvisors(new LoggingAdvisor("OpenAI"))
-            .build();
+                .chatModel(openAiModel)
+                .defaultAdvisors(new LoggingAdvisor("OpenAI"))
+                .build();
     }
 
     // Anthropic ChatClient
@@ -2335,9 +2374,9 @@ public class MultiModelConfiguration {
     @Qualifier("anthropic")
     public ChatClient anthropicChatClient(@Qualifier("anthropic") ChatModel anthropicModel) {
         return ChatClient.builder()
-            .chatModel(anthropicModel)
-            .defaultAdvisors(new LoggingAdvisor("Anthropic"))
-            .build();
+                .chatModel(anthropicModel)
+                .defaultAdvisors(new LoggingAdvisor("Anthropic"))
+                .build();
     }
 
     // Ollama ChatClient
@@ -2345,9 +2384,9 @@ public class MultiModelConfiguration {
     @Qualifier("ollama")
     public ChatClient ollamaChatClient(@Qualifier("ollama") ChatModel ollamaModel) {
         return ChatClient.builder()
-            .chatModel(ollamaModel)
-            .defaultAdvisors(new LoggingAdvisor("Ollama"))
-            .build();
+                .chatModel(ollamaModel)
+                .defaultAdvisors(new LoggingAdvisor("Ollama"))
+                .build();
     }
 }
 
@@ -2359,13 +2398,13 @@ public class ModelRoutingService {
     private final ModelSelectionStrategy selectionStrategy;
 
     public ModelRoutingService(@Qualifier("openai") ChatClient openAiClient,
-                              @Qualifier("anthropic") ChatClient anthropicClient,
-                              @Qualifier("ollama") ChatClient ollamaClient,
-                              ModelSelectionStrategy selectionStrategy) {
+                               @Qualifier("anthropic") ChatClient anthropicClient,
+                               @Qualifier("ollama") ChatClient ollamaClient,
+                               ModelSelectionStrategy selectionStrategy) {
         this.chatClients = Map.of(
-            "openai", openAiClient,
-            "anthropic", anthropicClient,
-            "ollama", ollamaClient
+                "openai", openAiClient,
+                "anthropic", anthropicClient,
+                "ollama", ollamaClient
         );
         this.selectionStrategy = selectionStrategy;
     }
@@ -2384,8 +2423,8 @@ public class ModelRoutingService {
 
     private String fallbackChat(String message, String failedModel) {
         List<String> availableModels = chatClients.keySet().stream()
-            .filter(model -> !model.equals(failedModel))
-            .collect(Collectors.toList());
+                .filter(model -> !model.equals(failedModel))
+                .collect(Collectors.toList());
 
         for (String model : availableModels) {
             try {
@@ -2418,14 +2457,14 @@ public class ModelSelectionStrategy {
 
     private boolean isCodeRelated(String message) {
         return message.toLowerCase().contains("代码") ||
-               message.toLowerCase().contains("编程") ||
-               message.contains("```");
+                message.toLowerCase().contains("编程") ||
+                message.contains("```");
     }
 
     private boolean isCreativeTask(String message) {
         return message.toLowerCase().contains("创作") ||
-               message.toLowerCase().contains("故事") ||
-               message.toLowerCase().contains("诗歌");
+                message.toLowerCase().contains("故事") ||
+                message.toLowerCase().contains("诗歌");
     }
 }
 
@@ -2443,24 +2482,25 @@ public class ChatContext {
 **连接池优化：**
 
 ```java
+
 @Configuration
 public class AIPerformanceConfiguration {
 
     @Bean
     public RestTemplate aiRestTemplate() {
         HttpComponentsClientHttpRequestFactory factory =
-            new HttpComponentsClientHttpRequestFactory();
+                new HttpComponentsClientHttpRequestFactory();
 
         // 连接池配置
         PoolingHttpClientConnectionManager connectionManager =
-            new PoolingHttpClientConnectionManager();
+                new PoolingHttpClientConnectionManager();
         connectionManager.setMaxTotal(100);
         connectionManager.setDefaultMaxPerRoute(20);
 
         CloseableHttpClient httpClient = HttpClients.custom()
-            .setConnectionManager(connectionManager)
-            .setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
-            .build();
+                .setConnectionManager(connectionManager)
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
+                .build();
 
         factory.setHttpClient(httpClient);
         factory.setConnectTimeout(5000);
@@ -2486,6 +2526,7 @@ public class AIPerformanceConfiguration {
 **批处理优化：**
 
 ```java
+
 @Service
 public class BatchProcessingService {
 
@@ -2498,28 +2539,28 @@ public class BatchProcessingService {
         List<List<String>> batches = partition(messages, 10);
 
         List<CompletableFuture<List<String>>> futures = batches.stream()
-            .map(this::processBatch)
-            .collect(Collectors.toList());
+                .map(this::processBatch)
+                .collect(Collectors.toList());
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-            .thenApply(v -> futures.stream()
-                .map(CompletableFuture::join)
-                .flatMap(List::stream)
-                .collect(Collectors.toList()));
+                .thenApply(v -> futures.stream()
+                        .map(CompletableFuture::join)
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList()));
     }
 
     private CompletableFuture<List<String>> processBatch(List<String> batch) {
         return CompletableFuture.supplyAsync(() ->
-            batch.stream()
-                .map(message -> chatClient.prompt(message).call().content())
-                .collect(Collectors.toList())
+                batch.stream()
+                        .map(message -> chatClient.prompt(message).call().content())
+                        .collect(Collectors.toList())
         );
     }
 
     private <T> List<List<T>> partition(List<T> list, int size) {
         return IntStream.range(0, (list.size() + size - 1) / size)
-            .mapToObj(i -> list.subList(i * size, Math.min((i + 1) * size, list.size())))
-            .collect(Collectors.toList());
+                .mapToObj(i -> list.subList(i * size, Math.min((i + 1) * size, list.size())))
+                .collect(Collectors.toList());
     }
 }
 ```
@@ -2527,6 +2568,7 @@ public class BatchProcessingService {
 **缓存策略：**
 
 ```java
+
 @Configuration
 @EnableCaching
 public class CacheConfiguration {
@@ -2534,20 +2576,20 @@ public class CacheConfiguration {
     @Bean
     public CacheManager cacheManager() {
         RedisCacheManager.Builder builder = RedisCacheManager
-            .RedisCacheManagerBuilder
-            .fromConnectionFactory(redisConnectionFactory())
-            .cacheDefaults(cacheConfiguration());
+                .RedisCacheManagerBuilder
+                .fromConnectionFactory(redisConnectionFactory())
+                .cacheDefaults(cacheConfiguration());
 
         return builder.build();
     }
 
     private RedisCacheConfiguration cacheConfiguration() {
         return RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofHours(1))
-            .serializeKeysWith(RedisSerializationContext.SerializationPair
-                .fromSerializer(new StringRedisSerializer()))
-            .serializeValuesWith(RedisSerializationContext.SerializationPair
-                .fromSerializer(new GenericJackson2JsonRedisSerializer()));
+                .entryTtl(Duration.ofHours(1))
+                .serializeKeysWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(new GenericJackson2JsonRedisSerializer()));
     }
 }
 
@@ -2681,35 +2723,35 @@ spec:
         app: spring-ai-app
     spec:
       containers:
-      - name: spring-ai-app
-        image: spring-ai-demo:latest
-        ports:
-        - containerPort: 8080
-        env:
-        - name: OPENAI_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: ai-secrets
-              key: openai-api-key
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: spring-ai-app
+          image: spring-ai-demo:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-secrets
+                  key: openai-api-key
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
 
 ---
 apiVersion: v1
@@ -2720,557 +2762,23 @@ spec:
   selector:
     app: spring-ai-app
   ports:
-  - port: 80
-    targetPort: 8080
+    - port: 80
+      targetPort: 8080
   type: LoadBalancer
 ```
 
 ## 6. 实战项目示例
 
-### 6.1 企业知识库系统（RAG应用）
-
-这是一个完整的企业知识库系统，支持文档上传、智能问答和知识管理。
-
-**项目结构：**
-
-```
-enterprise-knowledge-base/
-├── src/main/java/com/example/kb/
-│   ├── KnowledgeBaseApplication.java
-│   ├── config/
-│   │   ├── AIConfiguration.java
-│   │   └── SecurityConfiguration.java
-│   ├── controller/
-│   │   ├── DocumentController.java
-│   │   └── QueryController.java
-│   ├── service/
-│   │   ├── DocumentService.java
-│   │   ├── QueryService.java
-│   │   └── UserService.java
-│   ├── model/
-│   │   ├── Document.java
-│   │   ├── Query.java
-│   │   └── User.java
-│   └── repository/
-│       ├── DocumentRepository.java
-│       └── QueryRepository.java
-├── src/main/resources/
-│   ├── application.yml
-│   └── static/
-└── pom.xml
-```
-
-**核心实现代码：**
-
-```java
-// 1. 主应用类
-@SpringBootApplication
-@EnableJpaRepositories
-@EnableScheduling
-public class KnowledgeBaseApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(KnowledgeBaseApplication.class, args);
-    }
-}
-
-// 2. AI配置
-@Configuration
-public class AIConfiguration {
-
-    @Bean
-    public ChatClient chatClient(ChatClient.Builder builder, VectorStore vectorStore) {
-        return builder
-            .defaultAdvisors(
-                new LoggingAdvisor(),
-                new SecurityAdvisor(),
-                QuestionAnswerAdvisor.builder(vectorStore).build()
-            )
-            .build();
-    }
-
-    @Bean
-    public VectorStore vectorStore(JdbcTemplate jdbcTemplate,
-                                  EmbeddingModel embeddingModel) {
-        return PgVectorStore.builder(jdbcTemplate, embeddingModel)
-            .dimensions(1536)
-            .distanceType(PgVectorStore.PgDistanceType.COSINE_DISTANCE)
-            .indexType(PgVectorStore.PgIndexType.HNSW)
-            .initializeSchema(true)
-            .schemaName("public")
-            .vectorTableName("enterprise_kb_vectors")
-            .maxDocumentBatchSize(10000)
-            .build();
-    }
-
-    @Bean
-    public DocumentReader pdfDocumentReader() {
-        return new PagePdfDocumentReader();
-    }
-
-    @Bean
-    public TextSplitter textSplitter() {
-        return new TokenTextSplitter(1000, 200);
-    }
-}
-
-// 3. 文档服务
-@Service
-@Transactional
-public class DocumentService {
-
-    private final VectorStore vectorStore;
-    private final DocumentRepository documentRepository;
-    private final DocumentReader documentReader;
-    private final TextSplitter textSplitter;
-
-    public DocumentUploadResult uploadDocument(MultipartFile file, String category, String userId) {
-        try {
-            // 保存文件信息到数据库
-            DocumentEntity document = new DocumentEntity();
-            document.setFilename(file.getOriginalFilename());
-            document.setCategory(category);
-            document.setUploadedBy(userId);
-            document.setUploadTime(LocalDateTime.now());
-            document.setStatus("PROCESSING");
-
-            DocumentEntity savedDoc = documentRepository.save(document);
-
-            // 异步处理文档
-            processDocumentAsync(file, savedDoc);
-
-            return new DocumentUploadResult(savedDoc.getId(), "SUCCESS", "文档上传成功，正在处理中");
-
-        } catch (Exception e) {
-            return new DocumentUploadResult(null, "ERROR", "文档上传失败：" + e.getMessage());
-        }
-    }
-
-    @Async
-    public void processDocumentAsync(MultipartFile file, DocumentEntity document) {
-        try {
-            // 读取文档内容
-            Resource resource = new InputStreamResource(file.getInputStream());
-            List<org.springframework.ai.document.Document> docs = documentReader.get();
-
-            // 分割文档
-            List<org.springframework.ai.document.Document> splitDocs = textSplitter.apply(docs);
-
-            // 添加元数据
-            splitDocs.forEach(doc -> {
-                doc.getMetadata().put("document_id", document.getId().toString());
-                doc.getMetadata().put("filename", document.getFilename());
-                doc.getMetadata().put("category", document.getCategory());
-                doc.getMetadata().put("upload_time", document.getUploadTime().toString());
-            });
-
-            // 存储到向量数据库
-            vectorStore.add(splitDocs);
-
-            // 更新文档状态
-            document.setStatus("COMPLETED");
-            document.setProcessedTime(LocalDateTime.now());
-            documentRepository.save(document);
-
-        } catch (Exception e) {
-            document.setStatus("FAILED");
-            document.setErrorMessage(e.getMessage());
-            documentRepository.save(document);
-        }
-    }
-
-    public List<DocumentEntity> getDocuments(String userId, String category) {
-        if (category != null) {
-            return documentRepository.findByUploadedByAndCategory(userId, category);
-        } else {
-            return documentRepository.findByUploadedBy(userId);
-        }
-    }
-
-    public void deleteDocument(Long documentId, String userId) {
-        DocumentEntity document = documentRepository.findById(documentId)
-            .orElseThrow(() -> new RuntimeException("文档不存在"));
-
-        if (!document.getUploadedBy().equals(userId)) {
-            throw new RuntimeException("无权限删除此文档");
-        }
-
-        // 从向量数据库删除
-        vectorStore.delete(List.of(documentId.toString()));
-
-        // 从数据库删除
-        documentRepository.delete(document);
-    }
-}
-
-// 4. 查询服务
-@Service
-public class QueryService {
-
-    private final ChatClient chatClient;
-    private final QueryRepository queryRepository;
-
-    public QueryResult query(String question, String userId, String category) {
-        try {
-            // 记录查询
-            QueryEntity query = new QueryEntity();
-            query.setQuestion(question);
-            query.setUserId(userId);
-            query.setCategory(category);
-            query.setQueryTime(LocalDateTime.now());
-
-            // 构建查询上下文
-            String systemPrompt = buildSystemPrompt(category);
-
-            // 执行查询
-            String answer = chatClient.prompt()
-                .system(systemPrompt)
-                .user(question)
-                .call()
-                .content();
-
-            // 保存结果
-            query.setAnswer(answer);
-            query.setStatus("SUCCESS");
-            queryRepository.save(query);
-
-            return new QueryResult(answer, "SUCCESS", null);
-
-        } catch (Exception e) {
-            return new QueryResult(null, "ERROR", e.getMessage());
-        }
-    }
-
-    private String buildSystemPrompt(String category) {
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("你是一个企业知识库助手。请基于提供的文档内容回答用户问题。\n");
-        prompt.append("回答要求：\n");
-        prompt.append("1. 准确性：确保答案基于文档内容\n");
-        prompt.append("2. 完整性：提供全面的信息\n");
-        prompt.append("3. 可读性：使用清晰的语言和结构\n");
-        prompt.append("4. 引用：在适当时候引用相关文档\n");
-
-        if (category != null) {
-            prompt.append("5. 专业性：重点关注").append(category).append("领域的专业知识\n");
-        }
-
-        prompt.append("\n如果文档中没有相关信息，请明确说明。");
-
-        return prompt.toString();
-    }
-
-    public List<QueryEntity> getQueryHistory(String userId, int limit) {
-        return queryRepository.findByUserIdOrderByQueryTimeDesc(userId, PageRequest.of(0, limit));
-    }
-}
-
-// 5. REST控制器
-@RestController
-@RequestMapping("/api/documents")
-@PreAuthorize("hasRole('USER')")
-public class DocumentController {
-
-    private final DocumentService documentService;
-
-    @PostMapping("/upload")
-    public ResponseEntity<DocumentUploadResult> uploadDocument(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("category") String category,
-            Authentication authentication) {
-
-        String userId = authentication.getName();
-        DocumentUploadResult result = documentService.uploadDocument(file, category, userId);
-
-        if ("SUCCESS".equals(result.status())) {
-            return ResponseEntity.ok(result);
-        } else {
-            return ResponseEntity.badRequest().body(result);
-        }
-    }
-
-    @GetMapping
-    public ResponseEntity<List<DocumentEntity>> getDocuments(
-            @RequestParam(required = false) String category,
-            Authentication authentication) {
-
-        String userId = authentication.getName();
-        List<DocumentEntity> documents = documentService.getDocuments(userId, category);
-        return ResponseEntity.ok(documents);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDocument(@PathVariable Long id,
-                                             Authentication authentication) {
-        String userId = authentication.getName();
-        documentService.deleteDocument(id, userId);
-        return ResponseEntity.ok().build();
-    }
-}
-
-@RestController
-@RequestMapping("/api/query")
-@PreAuthorize("hasRole('USER')")
-public class QueryController {
-
-    private final QueryService queryService;
-
-    @PostMapping
-    public ResponseEntity<QueryResult> query(@RequestBody QueryRequest request,
-                                           Authentication authentication) {
-        String userId = authentication.getName();
-        QueryResult result = queryService.query(request.question(), userId, request.category());
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/history")
-    public ResponseEntity<List<QueryEntity>> getHistory(
-            @RequestParam(defaultValue = "10") int limit,
-            Authentication authentication) {
-
-        String userId = authentication.getName();
-        List<QueryEntity> history = queryService.getQueryHistory(userId, limit);
-        return ResponseEntity.ok(history);
-    }
-}
-
-// 6. 数据模型
-@Entity
-@Table(name = "documents")
-public class DocumentEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String filename;
-    private String category;
-    private String uploadedBy;
-    private LocalDateTime uploadTime;
-    private LocalDateTime processedTime;
-    private String status; // PROCESSING, COMPLETED, FAILED
-    private String errorMessage;
-
-    // getters and setters
-}
-
-@Entity
-@Table(name = "queries")
-public class QueryEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String question;
-    private String answer;
-    private String userId;
-    private String category;
-    private LocalDateTime queryTime;
-    private String status;
-
-    // getters and setters
-}
-
-// 7. 记录类型
-public record DocumentUploadResult(Long documentId, String status, String message) {}
-public record QueryResult(String answer, String status, String error) {}
-public record QueryRequest(String question, String category) {}
-```
-
-### 6.2 智能客服机器人系统
-
-这是一个完整的智能客服系统，支持多轮对话、工具调用和人工转接。
-
-**核心功能：**
-- 智能对话管理
-- 订单查询和处理
-- 常见问题自动回答
-- 情感分析和升级处理
-- 人工客服转接
-
-**实现代码：**
-
-```java
-// 1. 客服机器人服务
-@Service
-public class CustomerServiceBot {
-
-    private final ChatClient chatClient;
-    private final ConversationMemory conversationMemory;
-    private final OrderService orderService;
-    private final KnowledgeBaseService knowledgeBaseService;
-    private final HumanAgentService humanAgentService;
-
-    public CustomerServiceBot(ChatClient.Builder builder,
-                             ConversationMemory conversationMemory,
-                             List<ToolCallback> toolCallbacks) {
-        this.conversationMemory = conversationMemory;
-
-        this.chatClient = builder
-            .defaultAdvisors(
-                new ConversationMemoryAdvisor(conversationMemory),
-                new SentimentAnalysisAdvisor(),
-                new EscalationAdvisor(humanAgentService)
-            )
-            .defaultToolCallbacks(toolCallbacks)
-            .build();
-    }
-
-    public ChatResponse handleMessage(String sessionId, String userMessage, String userId) {
-        // 检查是否需要人工介入
-        if (shouldEscalateToHuman(sessionId, userMessage)) {
-            return escalateToHuman(sessionId, userMessage, userId);
-        }
-
-        // AI处理
-        ChatResponse response = chatClient.prompt()
-            .system(buildSystemPrompt())
-            .user(userMessage)
-            .advisors(a -> a.param("sessionId", sessionId).param("userId", userId))
-            .call()
-            .chatResponse();
-
-        // 记录对话
-        recordConversation(sessionId, userMessage, response.getResult().getOutput().getContent());
-
-        return response;
-    }
-
-    private String buildSystemPrompt() {
-        return """
-            你是一个专业的客服助手，名字叫小智。你的职责是：
-
-            1. 友好、耐心地回答客户问题
-            2. 使用可用的工具查询订单、产品信息等
-            3. 对于复杂问题，引导客户提供更多信息
-            4. 如果无法解决问题，建议转接人工客服
-
-            回答风格：
-            - 使用礼貌、专业的语言
-            - 保持简洁明了
-            - 提供具体的解决方案
-            - 适时表达同理心
-
-            可用工具：
-            - queryOrder: 查询订单信息
-            - searchProducts: 搜索产品信息
-            - createTicket: 创建客服工单
-            - checkInventory: 检查库存状态
-            """;
-    }
-
-    private boolean shouldEscalateToHuman(String sessionId, String userMessage) {
-        // 检查升级条件
-        ConversationContext context = conversationMemory.getContext(sessionId);
-
-        // 1. 用户明确要求人工服务
-        if (userMessage.toLowerCase().contains("人工") ||
-            userMessage.toLowerCase().contains("转接")) {
-            return true;
-        }
-
-        // 2. 连续多次无法解决问题
-        if (context.getUnresolvedCount() >= 3) {
-            return true;
-        }
-
-        // 3. 情感分析显示用户非常不满
-        if (context.getSentimentScore() < -0.8) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private ChatResponse escalateToHuman(String sessionId, String userMessage, String userId) {
-        // 创建人工客服工单
-        Ticket ticket = humanAgentService.createTicket(sessionId, userMessage, userId);
-
-        // 返回转接消息
-        return ChatResponse.builder()
-            .withContent(String.format(
-                "我理解您的问题比较复杂，已为您转接人工客服。工单号：%s，预计等待时间：%d分钟。",
-                ticket.getId(),
-                humanAgentService.getEstimatedWaitTime()
-            ))
-            .build();
-    }
-}
-
-// 2. 工具服务
-@Service
-public class CustomerServiceTools {
-
-    private final OrderService orderService;
-    private final ProductService productService;
-    private final InventoryService inventoryService;
-    private final TicketService ticketService;
-
-    @Tool(description = "查询订单信息")
-    public OrderInfo queryOrder(@Parameter(description = "订单号") String orderNumber) {
-        Order order = orderService.findByOrderNumber(orderNumber);
-        if (order == null) {
-            return new OrderInfo(null, "未找到订单", null, null, null);
-        }
-
-        return new OrderInfo(
-            order.getOrderNumber(),
-            order.getStatus(),
-            order.getCreateTime(),
-            order.getItems(),
-            order.getTrackingNumber()
-        );
-    }
-
-    @Tool(description = "搜索产品信息")
-    public List<ProductInfo> searchProducts(@Parameter(description = "产品关键词") String keyword) {
-        return productService.searchByKeyword(keyword).stream()
-            .map(product -> new ProductInfo(
-                product.getId(),
-                product.getName(),
-                product.getPrice(),
-                product.getDescription(),
-                product.isInStock()
-            ))
-            .collect(Collectors.toList());
-    }
-
-    @Tool(description = "检查库存状态")
-    public InventoryInfo checkInventory(@Parameter(description = "产品ID") String productId) {
-        Inventory inventory = inventoryService.getByProductId(productId);
-        return new InventoryInfo(
-            productId,
-            inventory.getQuantity(),
-            inventory.getReserved(),
-            inventory.getAvailable(),
-            inventory.getNextRestockDate()
-        );
-    }
-
-    @Tool(description = "创建客服工单")
-    public TicketInfo createTicket(
-            @Parameter(description = "问题描述") String description,
-            @Parameter(description = "优先级") String priority,
-            @Parameter(description = "用户ID") String userId) {
-
-        Ticket ticket = ticketService.createTicket(description, priority, userId);
-        return new TicketInfo(
-            ticket.getId(),
-            ticket.getStatus(),
-            ticket.getPriority(),
-            ticket.getAssignedAgent(),
-            ticket.getEstimatedResolutionTime()
-        );
-    }
-
-    // 记录类型
-    public record OrderInfo(String orderNumber, String status, LocalDateTime createTime,
-                           List<OrderItem> items, String trackingNumber) {}
-    public record ProductInfo(String id, String name, BigDecimal price,
-                             String description, boolean inStock) {}
-    public record InventoryInfo(String productId, int quantity, int reserved,
-                               int available, LocalDateTime nextRestockDate) {}
-    public record TicketInfo(String id, String status, String priority,
-                            String assignedAgent, LocalDateTime estimatedResolutionTime) {}
-}
-```
+1. 智能客服系统
+   多轮对话管理：支持上下文记忆和会话状态管理
+   情感分析：自动识别用户情绪，适时转接人工客服
+   智能路由：根据问题类型自动分配到合适的处理流程
+   知识库集成：结合企业知识库提供准确答案
+2. 智能数据分析平台
+   自然语言查询：用自然语言查询数据库
+   数据可视化建议：根据数据特征推荐合适的图表类型
+   异常检测：自动识别数据异常和趋势变化
+   报告生成：自动生成数据分析报告
 
 ## 7. 最佳实践和生产部署
 
@@ -3279,32 +2787,33 @@ public class CustomerServiceTools {
 **1. 提示词工程最佳实践：**
 
 ```java
+
 @Component
 public class PromptTemplates {
 
     // 使用模板化提示词
     public static final String ANALYSIS_TEMPLATE = """
-        你是一个{role}专家。请分析以下{document_type}：
-
-        分析要求：
-        {requirements}
-
-        输出格式：
-        {output_format}
-
-        文档内容：
-        {content}
-        """;
+            你是一个{role}专家。请分析以下{document_type}：
+            
+            分析要求：
+            {requirements}
+            
+            输出格式：
+            {output_format}
+            
+            文档内容：
+            {content}
+            """;
 
     // 提示词构建器
     public String buildPrompt(String role, String documentType,
-                             List<String> requirements, String outputFormat, String content) {
+                              List<String> requirements, String outputFormat, String content) {
         return ANALYSIS_TEMPLATE
-            .replace("{role}", role)
-            .replace("{document_type}", documentType)
-            .replace("{requirements}", String.join("\n", requirements))
-            .replace("{output_format}", outputFormat)
-            .replace("{content}", content);
+                .replace("{role}", role)
+                .replace("{document_type}", documentType)
+                .replace("{requirements}", String.join("\n", requirements))
+                .replace("{output_format}", outputFormat)
+                .replace("{content}", content);
     }
 }
 ```
@@ -3312,13 +2821,14 @@ public class PromptTemplates {
 **2. 错误处理和重试策略：**
 
 ```java
+
 @Component
 public class ResilientAIService {
 
     @Retryable(
-        value = {OpenAiApiException.class, TimeoutException.class},
-        maxAttempts = 3,
-        backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
+            value = {OpenAiApiException.class, TimeoutException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
     )
     public String callAIWithRetry(String prompt) {
         return chatClient.prompt(prompt).call().content();
@@ -3338,6 +2848,7 @@ public class ResilientAIService {
 **3. 监控和观测：**
 
 ```java
+
 @Component
 public class AIMetricsCollector {
 
@@ -3405,6 +2916,7 @@ logging:
 **2. 性能调优：**
 
 ```java
+
 @Configuration
 public class PerformanceConfiguration {
 
@@ -3432,12 +2944,14 @@ public class PerformanceConfiguration {
 Spring AI框架为企业级AI应用开发提供了完整的解决方案：
 
 **核心优势：**
+
 1. **开发效率**：统一API、自动配置、丰富的生态系统
 2. **企业级特性**：安全、监控、扩展性、可观测性
 3. **模型可移植性**：避免供应商锁定，支持多种AI提供商
 4. **Spring生态集成**：与Spring Boot/Cloud无缝集成
 
 **最佳实践：**
+
 1. **从简单开始**：先实现基础功能，再逐步扩展
 2. **重视安全**：API密钥管理、内容过滤、访问控制
 3. **性能优化**：缓存、批处理、异步处理、连接池
@@ -3446,36 +2960,31 @@ Spring AI框架为企业级AI应用开发提供了完整的解决方案：
 **Spring AI 1.0 实施建议：**
 
 1. **版本选择**：
-   - 生产环境推荐使用 Spring AI 1.0.1 正式版
-   - 配合 Spring Boot 3.3+ 和 Java 17+ 使用
-   - 使用 PostgreSQL 17 + pgvector 作为向量存储
+    - 生产环境推荐使用 Spring AI 1.0.1 正式版
+    - 配合 Spring Boot 3.5+ 和 Java 17+ 使用
+    - 使用 PostgreSQL 17 + pgvector 作为向量存储
 
 2. **技术选型**：
-   - **向量数据库**：PostgreSQL 17 + pgvector（推荐）、Oracle、Neo4j
-   - **嵌入模型**：OpenAI text-embedding-3-large、Azure OpenAI
-   - **聊天模型**：OpenAI GPT-4、Anthropic Claude、本地 Ollama
+    - **向量数据库**：PostgreSQL 17 + pgvector（推荐）、Oracle、Neo4j
+    - **嵌入模型**：OpenAI text-embedding-3-small、Azure OpenAI
+    - **聊天模型**：OpenAI GPT-4、Anthropic Claude、本地 Ollama
 
 3. **架构设计**：
-   - 使用新的 starter 依赖：`spring-ai-starter-vector-store-pgvector`
-   - 启用观察性：配置日志记录和监控
-   - 考虑扩展性：使用批处理和异步处理
-   - 安全性：API 密钥管理、内容过滤、访问控制
+    - 使用新的 starter 依赖：`spring-ai-starter-vector-store-pgvector`
+    - 启用观察性：配置日志记录和监控
+    - 考虑扩展性：使用批处理和异步处理
+    - 安全性：API 密钥管理、内容过滤、访问控制
 
-4. **迁移指南**：
-   - 更新依赖到 Spring AI 1.0.1
-   - 替换废弃的配置属性
-   - 使用新的自动配置模块
-   - 测试向量存储兼容性
-
-5. **生产部署**：
-   - 使用 Docker Compose 或 Kubernetes
-   - 配置 PostgreSQL 17 集群
-   - 启用监控和日志收集
-   - 实施备份和恢复策略
+4. **生产部署**：
+    - 使用 Docker Compose 或 Kubernetes
+    - 配置 PostgreSQL 17 集群
+    - 启用监控和日志收集
+    - 实施备份和恢复策略
 
 **总结：**
 
-Spring AI 1.0 标志着框架的成熟，提供了生产级的稳定性和性能。通过本指南的学习和实践，结合 PostgreSQL 17 + pgvector 的强大向量搜索能力，您可以构建出高质量、可扩展的企业级 AI 应用。
+Spring AI 1.0 标志着框架的成熟，提供了生产级的稳定性和性能。通过本指南的学习和实践，结合 PostgreSQL 17 + pgvector
+的强大向量搜索能力，您可以构建出高质量、可扩展的企业级 AI 应用。
 
 框架的 1.0 版本确保了 API 稳定性和向后兼容性，是企业采用 Spring AI 进行生产部署的理想选择。
 
