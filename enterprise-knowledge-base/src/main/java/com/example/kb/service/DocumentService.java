@@ -12,6 +12,8 @@ import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
@@ -39,6 +41,10 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final TextSplitter textSplitter;
     private final KnowledgeBaseProperties kbProperties;
+
+    @Autowired
+    @Lazy
+    private DocumentService self;
 
     public DocumentService(VectorStore vectorStore, DocumentRepository documentRepository,
                            TextSplitter textSplitter, KnowledgeBaseProperties kbProperties) {
@@ -73,8 +79,8 @@ public class DocumentService {
 
             logger.info("文档实体已保存: documentId={}", savedDoc.getId());
 
-            // 异步处理文档
-            processDocumentAsync(file, savedDoc);
+            // 异步处理文档 - 使用 self 引用来避免内部调用问题
+            self.processDocumentAsync(file, savedDoc);
 
             return new DocumentUploadResult(savedDoc.getId(), "SUCCESS", "文档上传成功，正在处理中");
 
@@ -321,7 +327,7 @@ public class DocumentService {
             fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
 
-        String uniqueFilename = originalFilename + "_" + System.currentTimeMillis() + fileExtension;
+        String uniqueFilename = document.getId() + "_" + System.currentTimeMillis() + fileExtension;
         Path filePath = storagePath.resolve(uniqueFilename);
 
         // 保存文件

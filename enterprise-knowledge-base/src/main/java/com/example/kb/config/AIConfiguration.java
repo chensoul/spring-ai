@@ -32,13 +32,12 @@ public class AIConfiguration {
 
     @Bean
     public TextSplitter textSplitter() {
-        // 使用配置的 chunk-size 和 chunk-overlap
         return new TokenTextSplitter(
-            kbProperties.getVectorization().getChunkSize(),
-            kbProperties.getVectorization().getChunkOverlap(),
-            0, // min chunk size
-            0, // max chunk size
-            false // recursive
+                kbProperties.getVectorization().getChunkSize(),
+                kbProperties.getVectorization().getMinChunkSizeChars(),
+                kbProperties.getVectorization().getMinChunkLengthToEmbed(),
+                kbProperties.getVectorization().getMaxNumChunks(),
+                false // recursive
         );
     }
 }

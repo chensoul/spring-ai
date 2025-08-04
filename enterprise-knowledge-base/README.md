@@ -96,37 +96,30 @@ java -jar target/enterprise-knowledge-base-1.0.0.jar
 curl -X POST http://localhost:8080/api/documents/upload \
   -H "Content-Type: multipart/form-data" \
   -F "file=@/Users/chensoul/Downloads/jvm.pdf" \
-  -F "category=技术文档" \
-  -F "userId=user123"
-
-# 上传 Word 文档
-curl -X POST http://localhost:8080/api/documents/upload \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@/path/to/your/document.docx" \
-  -F "category=产品文档" \
-  -F "userId=user123"
+  -F "category=IT" \
+  -F "userId=admin"
 ```
 
 **获取文档列表**
 ```bash
 # 获取用户所有文档
-curl -X GET "http://localhost:8080/api/documents?userId=user123"
+curl -X GET "http://localhost:8080/api/documents?userId=admin"
 
 # 获取指定分类的文档
-curl -X GET "http://localhost:8080/api/documents?userId=user123&category=技术文档"
+curl -X GET "http://localhost:8080/api/documents?userId=admin&category=IT"
 
 # 获取文档详情
-curl -X GET "http://localhost:8080/api/documents/1?userId=user123"
+curl -X GET "http://localhost:8080/api/documents/8?userId=admin"
 ```
 
 **删除文档**
 ```bash
-curl -X DELETE "http://localhost:8080/api/documents/1?userId=user123"
+curl -X DELETE "http://localhost:8080/api/documents/1?userId=admin"
 ```
 
 **重新处理失败的文档**
 ```bash
-curl -X POST "http://localhost:8080/api/documents/1/reprocess?userId=user123"
+curl -X POST "http://localhost:8080/api/documents/1/reprocess?userId=admin"
 ```
 
 #### 2. 智能问答接口
@@ -137,8 +130,8 @@ curl -X POST "http://localhost:8080/api/documents/1/reprocess?userId=user123"
 curl -X POST http://localhost:8080/api/query \
   -H "Content-Type: application/json" \
   -d '{
-    "question": "什么是 Spring AI？",
-    "userId": "user123"
+    "question": "什么是 JVM？",
+    "userId": "admin"
   }'
 
 # 指定分类的问答
@@ -147,187 +140,18 @@ curl -X POST http://localhost:8080/api/query \
   -d '{
     "question": "如何配置 PostgreSQL 数据库？",
     "category": "技术文档",
-    "userId": "user123"
+    "userId": "admin"
   }'
 ```
 
 **获取查询历史**
 ```bash
 # 获取最近的查询历史
-curl -X GET "http://localhost:8080/api/query/history?userId=user123&limit=10"
+curl -X GET "http://localhost:8080/api/query/history?userId=admin&limit=10"
 
 # 获取指定分类的查询历史
-curl -X GET "http://localhost:8080/api/query/history?userId=user123&category=技术文档&limit=5"
+curl -X GET "http://localhost:8080/api/query/history?userId=admin&category=技术文档&limit=5"
 ```
-
-#### 3. 用户管理接口
-
-**用户注册**
-```bash
-curl -X POST http://localhost:8080/api/users/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "email": "test@example.com",
-    "password": "password123"
-  }'
-```
-
-**用户登录**
-```bash
-curl -X POST http://localhost:8080/api/users/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "password": "password123"
-  }'
-```
-
-#### 4. 系统监控接口
-
-**健康检查**
-```bash
-curl -X GET http://localhost:8080/actuator/health
-```
-
-**获取应用信息**
-```bash
-curl -X GET http://localhost:8080/actuator/info
-```
-
-**获取监控指标**
-```bash
-curl -X GET http://localhost:8080/actuator/metrics
-```
-
-**获取 Prometheus 格式指标**
-```bash
-curl -X GET http://localhost:8080/actuator/prometheus
-```
-
-### 测试脚本示例
-
-创建一个测试脚本 `test-api.sh`：
-
-```bash
-#!/bin/bash
-
-# 设置基础 URL
-BASE_URL="http://localhost:8080"
-USER_ID="testuser123"
-
-echo "=== 企业知识库 API 测试 ==="
-
-# 1. 健康检查
-echo "1. 检查应用健康状态..."
-curl -s -X GET "$BASE_URL/actuator/health" | jq '.'
-
-# 2. 上传测试文档
-echo -e "\n2. 上传测试文档..."
-UPLOAD_RESPONSE=$(curl -s -X POST "$BASE_URL/api/documents/upload" \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@test-document.pdf" \
-  -F "category=测试文档" \
-  -F "userId=$USER_ID")
-
-echo "上传响应: $UPLOAD_RESPONSE"
-
-# 3. 获取文档列表
-echo -e "\n3. 获取文档列表..."
-curl -s -X GET "$BASE_URL/api/documents?userId=$USER_ID" | jq '.'
-
-# 4. 提交测试问题
-echo -e "\n4. 提交测试问题..."
-QUERY_RESPONSE=$(curl -s -X POST "$BASE_URL/api/query" \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"question\": \"这是一个测试问题\",
-    \"userId\": \"$USER_ID\"
-  }")
-
-echo "查询响应: $QUERY_RESPONSE"
-
-# 5. 获取查询历史
-echo -e "\n5. 获取查询历史..."
-curl -s -X GET "$BASE_URL/api/query/history?userId=$USER_ID&limit=5" | jq '.'
-
-echo -e "\n=== 测试完成 ==="
-```
-
-### 使用 jq 格式化 JSON 响应
-
-如果安装了 `jq`，可以更好地格式化 JSON 响应：
-
-```bash
-# 安装 jq (macOS)
-brew install jq
-
-# 安装 jq (Ubuntu/Debian)
-sudo apt-get install jq
-
-# 使用 jq 格式化响应
-curl -s -X GET "http://localhost:8080/api/documents?userId=user123" | jq '.'
-```
-
-### 环境变量配置
-
-创建 `.env` 文件来管理测试环境：
-
-```bash
-# .env
-API_BASE_URL=http://localhost:8080
-TEST_USER_ID=testuser123
-TEST_CATEGORY=技术文档
-```
-
-然后在测试脚本中使用：
-
-```bash
-#!/bin/bash
-source .env
-
-curl -X GET "$API_BASE_URL/api/documents?userId=$TEST_USER_ID"
-```
-
-### 快速测试
-
-项目提供了完整的测试脚本，可以直接运行：
-
-```bash
-# 给脚本添加执行权限
-chmod +x test-api.sh
-
-# 运行测试脚本
-./test-api.sh
-```
-
-测试脚本会自动：
-1. 检查服务状态
-2. 测试文档上传功能
-3. 测试文档查询功能
-4. 测试智能问答功能
-5. 测试用户管理功能
-6. 测试监控端点
-
-### 环境变量配置
-
-复制环境变量示例文件：
-
-```bash
-cp env.example .env
-```
-
-然后编辑 `.env` 文件，配置相应的参数。
-
-#### 知识库配置说明
-
-- `DOCUMENT_STORAGE_PATH`: 文档存储路径（默认: ./uploads）
-- `DOCUMENT_MAX_SIZE`: 文档最大大小，单位字节（默认: 52428800 = 50MB）
-- `DOCUMENT_ALLOWED_TYPES`: 允许的文件类型，逗号分隔（默认: pdf,txt,docx,md）
-- `CHUNK_SIZE`: 文档分块大小（默认: 1000）
-- `CHUNK_OVERLAP`: 文档分块重叠大小（默认: 200）
-- `VECTORIZATION_BATCH_SIZE`: 向量化批处理大小（默认: 10）
-
 
 ## 项目结构
 
@@ -398,7 +222,7 @@ spring:
           temperature: 0.7
       embedding:
         options:
-          model: text-embedding-3-large
+          model: text-embedding-3-small
 ```
 
 ## 部署指南

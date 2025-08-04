@@ -42,10 +42,13 @@ public class KnowledgeBaseProperties {
         }
     }
 
+
     public static class Vectorization {
-        private int chunkSize = 1000;
-        private int chunkOverlap = 200;
-        private int batchSize = 10;
+        private int chunkSize = 800;
+        private int minChunkSizeChars = 350;
+        private int minChunkLengthToEmbed=5;
+        private int maxNumChunks=10000;
+        private int batchSize=20;
 
         public int getChunkSize() {
             return chunkSize;
@@ -55,12 +58,28 @@ public class KnowledgeBaseProperties {
             this.chunkSize = chunkSize;
         }
 
-        public int getChunkOverlap() {
-            return chunkOverlap;
+        public int getMinChunkSizeChars() {
+            return minChunkSizeChars;
         }
 
-        public void setChunkOverlap(int chunkOverlap) {
-            this.chunkOverlap = chunkOverlap;
+        public void setMinChunkSizeChars(int minChunkSizeChars) {
+            this.minChunkSizeChars = minChunkSizeChars;
+        }
+
+        public int getMinChunkLengthToEmbed() {
+            return minChunkLengthToEmbed;
+        }
+
+        public void setMinChunkLengthToEmbed(int minChunkLengthToEmbed) {
+            this.minChunkLengthToEmbed = minChunkLengthToEmbed;
+        }
+
+        public int getMaxNumChunks() {
+            return maxNumChunks;
+        }
+
+        public void setMaxNumChunks(int maxNumChunks) {
+            this.maxNumChunks = maxNumChunks;
         }
 
         public int getBatchSize() {

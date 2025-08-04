@@ -1,7 +1,8 @@
 spring:
   application:
     name: enterprise-knowledge-base
-
+  main:
+    allow-circular-references: true
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/enterprise_kb}
     username: ${DATABASE_USERNAME:postgres}
@@ -14,7 +15,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:update}
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -31,7 +32,7 @@ spring:
           temperature: ${OPENAI_TEMPERATURE:0.7}
       embedding:
         options:
-          model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-large}
+          model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
 
     vectorstore:
       pgvector:
@@ -56,9 +57,11 @@ app:
       max-size: ${DOCUMENT_MAX_SIZE:52428800}  # 50MB
       allowed-types: ${DOCUMENT_ALLOWED_TYPES:pdf,txt,docx,md}
     vectorization:
-      chunk-size: ${CHUNK_SIZE:1000}
-      chunk-overlap: ${CHUNK_OVERLAP:200}
-      batch-size: ${VECTORIZATION_BATCH_SIZE:10}
+      chunk-size: 1000
+      minChunkSizeChars: 350
+      minChunkLengthToEmbed: 5
+      maxNumChunks: 10000
+      batch-size: ${VECTORIZATION_BATCH_SIZE:50}
 
 # 监控配置
 management:

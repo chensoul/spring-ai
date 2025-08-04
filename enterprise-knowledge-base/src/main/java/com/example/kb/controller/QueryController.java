@@ -21,16 +21,13 @@ public class QueryController {
 
     @PostMapping
     public ResponseEntity<QueryResult> query(@RequestBody QueryRequest request) {
-        String userId = "admin";
-        QueryResult result = queryService.query(request.question(), userId, request.category());
+        QueryResult result = queryService.query(request.question(), request.userId(), request.category());
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/history")
     public ResponseEntity<List<QueryEntity>> getHistory(
-            @RequestParam(defaultValue = "10") int limit) {
-
-        String userId = "admin";
+            @RequestParam(defaultValue = "10") int limit, @RequestParam(value = "userId", defaultValue = "admin") String userId) {
         List<QueryEntity> history = queryService.getQueryHistory(userId, limit);
         return ResponseEntity.ok(history);
     }
