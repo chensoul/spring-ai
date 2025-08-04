@@ -28,7 +28,7 @@ spring:
   ai:
     # OpenAI 配置
     openai:
-      api-key: ${OPENAI_API_KEY:sk-TXybYLhGOVTzaQqFWuvKOsjc4VBwcpRfbcJZXTVjy7u2XSIk}
+      api-key: ${OPENAI_API_KEY:sk-test-key}
       base-url: https://api.openai-hub.com
       chat:
         options:
