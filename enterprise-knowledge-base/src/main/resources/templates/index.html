@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${appName}">企业知识库系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .api-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+        
+        .api-endpoint {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .get { background: #28a745; }
+        .post { background: #007bff; }
+        .delete { background: #dc3545; }
+        
+        .user-info {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 th:text="${appName}">🚀 企业知识库系统</h1>
+            <p>基于Spring AI的智能知识管理平台</p>
+        </div>
+        
+        <div th:if="${username}" class="user-info">
+            <h3>👋 欢迎回来，<span th:text="${username}">用户</span>！</h3>
+            <p>当前时间：<span th:text="${#temporals.format(currentTime, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+            <p>权限：<span th:text="${authorities}"></span></p>
+        </div>
+        
+        <div class="main-content">
+            <h2>🎯 核心功能</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>RAG智能问答</h3>
+                    <p>基于向量检索的增强生成，提供准确的知识问答服务</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3>文档管理</h3>
+                    <p>支持PDF、Word、文本等多种格式的文档上传和智能处理</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>向量搜索</h3>
+                    <p>基于语义相似度的智能搜索，替代传统关键词搜索</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>权限管理</h3>
+                    <p>完善的用户权限体系，确保数据安全和访问控制</p>
+                </div>
+            </div>
+            
+            <div class="api-section">
+                <h2>📡 API接口</h2>
+                <p>以下是主要的API端点，您可以使用这些接口与系统交互：</p>
+                
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/api/documents/upload</strong> - 上传文档
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/api/documents</strong> - 获取文档列表
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/api/query</strong> - 执行智能查询
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/api/query/history</strong> - 获取查询历史
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method delete">DELETE</span>
+                    <strong>/api/documents/{id}</strong> - 删除文档
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <h2>🚀 快速开始</h2>
+                <p>选择以下方式开始使用系统：</p>
+                <a href="/api/actuator/health" class="btn">健康检查</a>
+                <a href="/api/info" class="btn">系统信息</a>
+                <a href="/h2-console" class="btn">数据库控制台</a>
+                <a href="/swagger-ui.html" class="btn">API文档</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 企业知识库系统 | 版本 <span th:text="${version}">1.0.0</span> | 基于Spring AI构建</p>
+        </div>
+    </div>
+</body>
+</html>

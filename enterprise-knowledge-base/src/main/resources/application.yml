@@ -1,0 +1,111 @@
+spring:
+  application:
+    name: enterprise-knowledge-base
+  
+  # 数据源配置
+  datasource:
+    url: ${DATABASE_URL:jdbc:h2:mem:testdb}
+    username: ${DATABASE_USERNAME:sa}
+    password: ${DATABASE_PASSWORD:}
+    driver-class-name: ${DATABASE_DRIVER:org.h2.Driver}
+  
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.H2Dialect}
+  
+  # H2控制台（开发环境）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # AI模型配置
+  ai:
+    # OpenAI配置
+    openai:
+      api-key: ${OPENAI_API_KEY:your-openai-api-key}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+      chat:
+        enabled: true
+        options:
+          model: gpt-4o
+          temperature: 0.7
+          max-tokens: 2000
+      embedding:
+        enabled: true
+        options:
+          model: text-embedding-3-large
+    
+
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  
+  # 安全配置
+  security:
+    user:
+      name: ${SECURITY_USER_NAME:admin}
+      password: ${SECURITY_USER_PASSWORD:admin123}
+      roles: ${SECURITY_USER_ROLES:ADMIN,USER}
+
+# 服务器配置
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api
+
+# 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# 日志配置
+logging:
+  level:
+    org.springframework.ai: DEBUG
+    com.example.kb: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 应用自定义配置
+app:
+  knowledge-base:
+    # 文档处理配置
+    document:
+      max-size: 50MB
+      allowed-types: pdf,txt,docx,md
+      storage-path: ${DOCUMENT_STORAGE_PATH:./uploads}
+    
+    # 向量化配置
+    vectorization:
+      chunk-size: 1000
+      chunk-overlap: 200
+      batch-size: 10
+    
+    # 查询配置
+    query:
+      max-results: 5
+      similarity-threshold: 0.75
+      max-history: 10
