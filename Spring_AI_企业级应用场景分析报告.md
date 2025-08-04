@@ -800,7 +800,7 @@ public class AdvisorConfiguration {
 
     <properties>
         <java.version>17</java.version>
-        <spring-ai.version>1.0.0</spring-ai.version>
+        <spring-ai.version>1.0.1</spring-ai.version>
     </properties>
 
     <dependencyManagement>
@@ -936,7 +936,7 @@ public class AdvisorConfiguration {
 ```gradle
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.5'
+    id 'org.springframework.boot' version '3.5.4'
     id 'io.spring.dependency-management' version '1.1.4'
 }
 
@@ -950,7 +950,7 @@ repositories {
 }
 
 ext {
-    set('springAiVersion', '1.0.0')
+    set('springAiVersion', '1.0.1')
 }
 
 dependencies {
@@ -3446,7 +3446,7 @@ Spring AI框架为企业级AI应用开发提供了完整的解决方案：
 **Spring AI 1.0 实施建议：**
 
 1. **版本选择**：
-   - 生产环境推荐使用 Spring AI 1.0.0 正式版
+   - 生产环境推荐使用 Spring AI 1.0.1 正式版
    - 配合 Spring Boot 3.3+ 和 Java 17+ 使用
    - 使用 PostgreSQL 17 + pgvector 作为向量存储
 
@@ -3462,7 +3462,7 @@ Spring AI框架为企业级AI应用开发提供了完整的解决方案：
    - 安全性：API 密钥管理、内容过滤、访问控制
 
 4. **迁移指南**：
-   - 更新依赖到 Spring AI 1.0.0
+   - 更新依赖到 Spring AI 1.0.1
    - 替换废弃的配置属性
    - 使用新的自动配置模块
    - 测试向量存储兼容性
@@ -3481,4 +3481,4 @@ Spring AI 1.0 标志着框架的成熟，提供了生产级的稳定性和性能
 
 ---
 
-*本技术指南基于Spring AI 1.0.0版本编写，建议关注官方文档获取最新更新。*
+*本技术指南基于Spring AI 1.0.1版本编写，建议关注官方文档获取最新更新。*
