@@ -32,11 +32,17 @@ public class AIConfiguration {
 
     @Bean
     public TextSplitter textSplitter() {
+        // 优化分割参数以提高性能
+        int chunkSize = Math.max(kbProperties.getVectorization().getChunkSize(), 800);
+        int minChunkSizeChars = Math.max(kbProperties.getVectorization().getMinChunkSizeChars(), 350);
+        int minChunkLengthToEmbed = Math.max(kbProperties.getVectorization().getMinChunkLengthToEmbed(), 5);
+        int maxNumChunks = Math.max(kbProperties.getVectorization().getMaxNumChunks(), 10000);
+
         return new TokenTextSplitter(
-                kbProperties.getVectorization().getChunkSize(),
-                kbProperties.getVectorization().getMinChunkSizeChars(),
-                kbProperties.getVectorization().getMinChunkLengthToEmbed(),
-                kbProperties.getVectorization().getMaxNumChunks(),
+                chunkSize,           // 增加块大小，减少总块数
+                minChunkSizeChars,   // 增加最小块大小，避免过小的块
+                minChunkLengthToEmbed, // 增加最小嵌入长度
+                maxNumChunks,        // 增加最大块数限制
                 false // recursive
         );
     }

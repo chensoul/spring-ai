@@ -107,26 +107,49 @@ public class DocumentService {
             List<Document> docs = readDocumentContent(file);
             logger.debug("文档读取完成: documentId={}, chunks={}", document.getId(), docs.size());
 
-            // 分割文档
             List<Document> splitDocs = textSplitter.apply(docs);
-            logger.debug("文档分割完成: documentId={}, splitChunks={}", document.getId(), splitDocs.size());
+            logger.info("文档分割完成: documentId={}, originalChunks={}, splitChunks={}, splitter={}",
+                    document.getId(), docs.size(), splitDocs.size(), textSplitter.getClass().getSimpleName());
 
             // 添加元数据
             enrichDocumentMetadata(splitDocs, document);
 
-            // 使用配置的批处理大小存储到向量数据库
-            int batchSize = kbProperties.getVectorization().getBatchSize();
+            // 使用优化的批处理大小存储到向量数据库
+            int batchSize = Math.max(kbProperties.getVectorization().getBatchSize(), 50);
+            int totalBatches = (splitDocs.size() + batchSize - 1) / batchSize;
+
+            logger.info("开始向量化存储: documentId={}, totalChunks={}, batchSize={}, totalBatches={}",
+                    document.getId(), splitDocs.size(), batchSize, totalBatches);
+
+            long startTime = System.currentTimeMillis();
+
+            // 分批处理，使用更大的批处理大小提高性能
             for (int i = 0; i < splitDocs.size(); i += batchSize) {
                 int endIndex = Math.min(i + batchSize, splitDocs.size());
                 List<Document> batch = splitDocs.subList(i, endIndex);
-                vectorStore.add(batch);
-                logger.debug("已处理文档批次: documentId={}, batch={}/{}, size={}",
-                        document.getId(), (i / batchSize) + 1,
-                        (splitDocs.size() + batchSize - 1) / batchSize, batch.size());
+
+                try {
+                    vectorStore.add(batch);
+                    int currentBatch = (i / batchSize) + 1;
+                    long elapsedTime = System.currentTimeMillis() - startTime;
+                    double avgTimePerBatch = elapsedTime / (double) currentBatch;
+                    double estimatedRemainingTime = avgTimePerBatch * (totalBatches - currentBatch);
+
+                    logger.info("已处理文档批次: documentId={}, batch={}/{}, size={}, 耗时={}ms, 预计剩余={}ms",
+                            document.getId(), currentBatch, totalBatches, batch.size(),
+                            elapsedTime, (long) estimatedRemainingTime);
+
+                } catch (Exception e) {
+                    logger.error("批次处理失败: documentId={}, batch={}/{}, error={}",
+                            document.getId(), (i / batchSize) + 1, totalBatches, e.getMessage());
+                    throw e;
+                }
             }
-            logger.info("文档已存储到向量数据库: documentId={}, vectors={}, batches={}",
-                    document.getId(), splitDocs.size(),
-                    (splitDocs.size() + batchSize - 1) / batchSize);
+
+            long totalTime = System.currentTimeMillis() - startTime;
+            logger.info("文档向量化完成: documentId={}, vectors={}, batches={}, 总耗时={}ms, 平均每批次={}ms",
+                    document.getId(), splitDocs.size(), totalBatches, totalTime,
+                    totalTime / totalBatches);
 
             // 更新文档状态
             updateDocumentStatus(document, "COMPLETED", null);
