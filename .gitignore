@@ -43,3 +43,5 @@ build/
 ### My Host Data ###
 data
 logs
+
+uploads
