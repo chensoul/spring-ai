@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: enterprise-knowledge-base
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/enterprise_kb}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        show_sql: false
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:sk-TXybYLhGOVTzaQqFWuvKOsjc4VBwcpRfbcJZXTVjy7u2XSIk}
+      base-url: https://api.openai-hub.com
+      chat:
+        options:
+          model: ${OPENAI_CHAT_MODEL:gpt-4o}
+          temperature: ${OPENAI_TEMPERATURE:0.7}
+      embedding:
+        options:
+          model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-large}
+
+    vectorstore:
+      pgvector:
+        index-type: ${PGVECTOR_INDEX_TYPE:HNSW}
+        distance-type: ${PGVECTOR_DISTANCE_TYPE:COSINE_DISTANCE}
+        dimensions: ${PGVECTOR_DIMENSIONS:1536}
+        initialize-schema: ${PGVECTOR_INIT_SCHEMA:true}
+        schema-name: ${PGVECTOR_SCHEMA:public}
+        table-name: ${PGVECTOR_TABLE:enterprise_kb_vectors}
+        max-document-batch-size: ${PGVECTOR_BATCH_SIZE:10000}
+        schema-validation: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+# 应用配置
+app:
+  knowledge-base:
+    document:
+      storage-path: ${DOCUMENT_STORAGE_PATH:./uploads}
+      max-size: ${DOCUMENT_MAX_SIZE:52428800}  # 50MB
+      allowed-types: ${DOCUMENT_ALLOWED_TYPES:pdf,txt,docx,md}
+    vectorization:
+      chunk-size: ${CHUNK_SIZE:1000}
+      chunk-overlap: ${CHUNK_OVERLAP:200}
+      batch-size: ${VECTORIZATION_BATCH_SIZE:10}
+
+# 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# 日志配置
+logging:
+  level:
+    org.springframework.ai: INFO
+    com.example.kb: DEBUG
+    org.springframework.jdbc: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
