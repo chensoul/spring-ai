@@ -16,7 +16,49 @@
 
 ## 1. 框架概述与核心原理
 
-### 1.1 Spring AI架构设计理念
+### 1.1 Spring AI 1.0 新特性概览
+
+Spring AI 1.0 正式版带来了许多重要的改进和新特性：
+
+**核心改进：**
+- **稳定的 API**：1.0 版本标志着 API 的稳定，向后兼容性得到保证
+- **增强的向量存储支持**：新增对 Oracle、Neo4j、MariaDB 等数据库的支持
+- **改进的自动配置**：更细粒度的自动配置模块，支持按需加载
+- **观察性增强**：改进的日志记录和监控配置选项
+- **MCP 协议支持**：新增 Model Context Protocol 支持，增强模型互操作性
+
+**依赖管理改进：**
+
+| 组件类型 | 旧版本依赖 | Spring AI 1.0 依赖 |
+|----------|------------|-------------------|
+| Redis 向量存储 | `spring-ai-redis-store-spring-boot-starter` | `spring-ai-starter-vector-store-redis` |
+| PostgreSQL 向量存储 | `spring-ai-pgvector-store` | `spring-ai-starter-vector-store-pgvector` |
+| OpenAI 模型 | `spring-ai-openai-spring-boot-starter` | `spring-ai-starter-model-openai` |
+| Anthropic 模型 | `spring-ai-anthropic-spring-boot-starter` | `spring-ai-starter-model-anthropic` |
+| Ollama 模型 | `spring-ai-ollama-spring-boot-starter` | `spring-ai-starter-model-ollama` |
+
+- 新的 starter 命名规范：`spring-ai-starter-vector-store-*` 和 `spring-ai-starter-model-*`
+- 更精确的依赖管理，减少不必要的传递依赖
+- 支持 Spring Boot 3.3+ 和 Java 17+
+
+**向量存储增强：**
+- **PostgreSQL 17 + pgvector**：完整支持最新的 PostgreSQL 17 和 pgvector 扩展
+- **Oracle AI Vector Search**：企业级向量搜索支持
+- **Neo4j Vector Index**：图数据库向量搜索集成
+- **MariaDB Vector**：开源关系型数据库向量支持
+
+**配置属性重命名：**
+```properties
+# 旧版本（已废弃）
+spring.ai.chat.observations.include-prompt
+spring.ai.chat.observations.include-completion
+
+# 新版本（1.0+）
+spring.ai.chat.observations.log-prompt
+spring.ai.chat.observations.log-completion
+```
+
+### 1.2 Spring AI架构设计理念
 
 Spring AI是一个为Java开发者设计的AI应用框架，它将AI能力无缝集成到Spring生态系统中。其核心设计理念包括：
 
@@ -344,8 +386,10 @@ public class DocumentService {
 |--------|----------|------|------|
 | Redis | 中小型应用 | 简单易用，性能好 | 内存限制 |
 | Elasticsearch | 企业级应用 | 功能丰富，可扩展 | 复杂度高 |
-| PGVector | 关系型数据 | 与现有数据库集成 | 性能一般 |
+| PGVector | 关系型数据 | 与现有数据库集成，支持PostgreSQL 17 | 性能一般 |
 | Pinecone | 云端应用 | 专业向量数据库 | 成本较高 |
+| Oracle | 企业级应用 | 企业级特性，高性能 | 成本高，复杂度高 |
+| Neo4j | 图数据库应用 | 图关系查询，知识图谱 | 学习成本高 |
 
 ### 2.3 Embedding Models嵌入模型的集成方式
 
@@ -784,32 +828,61 @@ public class AdvisorConfiguration {
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
+        <!-- Database -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Spring AI Core -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-core</artifactId>
         </dependency>
 
-        <!-- AI Model Providers -->
+        <!-- AI Model Providers (Spring AI 1.0) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-anthropic-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-starter-model-anthropic</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-starter-model-ollama</artifactId>
         </dependency>
 
         <!-- Vector Stores -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-redis-store-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-starter-vector-store-redis</artifactId>
+        </dependency>
+
+        <!-- PostgreSQL Vector Store (pgvector) -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-vector-store-pgvector</artifactId>
+        </dependency>
+
+        <!-- RAG Advisors -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-advisors-vector-store</artifactId>
         </dependency>
 
         <dependency>
@@ -884,12 +957,17 @@ dependencies {
     // Spring Boot Starters
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
-    // Spring AI
+    // Database
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Spring AI (1.0)
     implementation 'org.springframework.ai:spring-ai-core'
-    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
-    implementation 'org.springframework.ai:spring-ai-anthropic-spring-boot-starter'
-    implementation 'org.springframework.ai:spring-ai-redis-store-spring-boot-starter'
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+    implementation 'org.springframework.ai:spring-ai-starter-model-anthropic'
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
     implementation 'org.springframework.ai:spring-ai-pdf-document-reader'
 
     // Observability
@@ -907,196 +985,338 @@ dependencyManagement {
 }
 ```
 
-### 3.2 必要的环境变量和API密钥配置
+### 3.2 PostgreSQL 17 + pgvector 配置
 
-**环境变量设置：**
+**Docker 启动 PostgreSQL 17 with pgvector：**
 
 ```bash
-# OpenAI配置
-export OPENAI_API_KEY=sk-your-openai-api-key
-export OPENAI_BASE_URL=https://api.openai.com/v1
+# 使用官方 pgvector 镜像（基于 PostgreSQL 17）
+docker run -d \
+  --name postgres-vector \
+  -p 5432:5432 \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=postgres \
+  pgvector/pgvector:pg17
 
-# Anthropic配置
-export ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key
-
-# Azure OpenAI配置
-export AZURE_OPENAI_API_KEY=your-azure-api-key
-export AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
-
-# Ollama配置（本地部署）
-export OLLAMA_BASE_URL=http://localhost:11434
-
-# 向量数据库配置
-export REDIS_URL=redis://localhost:6379
-export ELASTICSEARCH_URL=http://localhost:9200
-
-# 数据库配置
-export DATABASE_URL=jdbc:postgresql://localhost:5432/springai
-export DATABASE_USERNAME=springai
-export DATABASE_PASSWORD=your-password
+# 连接到数据库并创建扩展
+docker exec -it postgres-vector psql -U postgres -c "CREATE EXTENSION IF NOT EXISTS vector;"
+docker exec -it postgres-vector psql -U postgres -c "CREATE EXTENSION IF NOT EXISTS hstore;"
+docker exec -it postgres-vector psql -U postgres -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
 ```
 
-**application.yml配置：**
+**统一配置基础（application.yml）：**
 
 ```yaml
+# 通用配置（所有环境共享）
 spring:
   application:
-    name: spring-ai-demo
+    name: spring-ai-enterprise-kb
 
-  # AI模型配置
-  ai:
-    # OpenAI配置
-    openai:
-      api-key: ${OPENAI_API_KEY}
-      base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
-      chat:
-        enabled: true
-        options:
-          model: gpt-4o
-          temperature: 0.7
-          max-tokens: 2000
-      embedding:
-        enabled: true
-        options:
-          model: text-embedding-3-large
-
-    # Anthropic配置
-    anthropic:
-      api-key: ${ANTHROPIC_API_KEY}
-      chat:
-        enabled: true
-        options:
-          model: claude-3-5-sonnet-20241022
-          temperature: 0.7
-          max-tokens: 2000
-
-    # Azure OpenAI配置
-    azure:
-      openai:
-        api-key: ${AZURE_OPENAI_API_KEY}
-        endpoint: ${AZURE_OPENAI_ENDPOINT}
-        chat:
-          options:
-            deployment-name: gpt-4o
-            temperature: 0.7
-        embedding:
-          options:
-            deployment-name: text-embedding-ada-002
-
-    # Ollama配置
-    ollama:
-      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
-      chat:
-        enabled: true
-        options:
-          model: llama3.2
-          temperature: 0.7
-      embedding:
-        enabled: true
-        options:
-          model: nomic-embed-text
-
-    # 向量存储配置
-    vectorstore:
-      redis:
-        uri: ${REDIS_URL:redis://localhost:6379}
-        index: spring-ai-index
-        prefix: doc:
-      elasticsearch:
-        uris: ${ELASTICSEARCH_URL:http://localhost:9200}
-        index-name: spring-ai-docs
-
-  # 数据源配置
   datasource:
-    url: ${DATABASE_URL:jdbc:h2:mem:testdb}
-    username: ${DATABASE_USERNAME:sa}
-    password: ${DATABASE_PASSWORD:}
-    driver-class-name: org.h2.Driver
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
 
-  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        show_sql: false
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:demo}
+      chat:
+        options:
+          model: ${OPENAI_CHAT_MODEL:gpt-4o}
+          temperature: ${OPENAI_TEMPERATURE:0.7}
+      embedding:
+        options:
+          model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-large}
+
+    vectorstore:
+      pgvector:
+        index-type: ${PGVECTOR_INDEX_TYPE:HNSW}
+        distance-type: ${PGVECTOR_DISTANCE_TYPE:COSINE_DISTANCE}
+        dimensions: ${PGVECTOR_DIMENSIONS:1536}
+        initialize-schema: ${PGVECTOR_INIT_SCHEMA:true}
+        schema-name: ${PGVECTOR_SCHEMA:public}
+        table-name: ${PGVECTOR_TABLE:vector_store}
+        max-document-batch-size: ${PGVECTOR_BATCH_SIZE:10000}
+        schema-validation: true
+
+# 应用配置
+app:
+  knowledge-base:
+    document:
+      storage-path: ${DOCUMENT_STORAGE_PATH:./uploads}
+      max-size: ${DOCUMENT_MAX_SIZE:52428800}  # 50MB
+      allowed-types: ${DOCUMENT_ALLOWED_TYPES:pdf,txt,docx,md}
+    vectorization:
+      chunk-size: ${CHUNK_SIZE:1000}
+      chunk-overlap: ${CHUNK_OVERLAP:200}
+      batch-size: ${VECTORIZATION_BATCH_SIZE:10}
+```
+
+**手动配置 PgVectorStore Bean：**
+
+```java
+@Configuration
+public class VectorStoreConfiguration {
+
+    @Bean
+    public VectorStore vectorStore(JdbcTemplate jdbcTemplate, EmbeddingModel embeddingModel) {
+        return PgVectorStore.builder(jdbcTemplate, embeddingModel)
+            .dimensions(1536)                    // OpenAI embedding dimensions
+            .distanceType(PgVectorStore.PgDistanceType.COSINE_DISTANCE)
+            .indexType(PgVectorStore.PgIndexType.HNSW)
+            .initializeSchema(true)              // 自动创建表和索引
+            .schemaName("public")
+            .vectorTableName("vector_store")
+            .maxDocumentBatchSize(10000)
+            .build();
+    }
+}
+```
+
+**环境特定配置：**
+
+**开发环境（application-dev.yml）：**
+```yaml
+# 开发环境覆盖配置
+spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
+        show_sql: true
         format_sql: true
 
-# 监控配置
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: always
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-
-# 日志配置
 logging:
   level:
     org.springframework.ai: DEBUG
-    com.example: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    com.example.kb: DEBUG
+    org.springframework.jdbc: DEBUG
+
+# 环境变量示例
+# DATABASE_URL=jdbc:postgresql://localhost:5432/postgres_dev
+# PGVECTOR_TABLE=vector_store_dev
 ```
 
-**application-dev.yml（开发环境）：**
-
+**测试环境（application-test.yml）：**
 ```yaml
+# 测试环境覆盖配置
 spring:
-  ai:
-    openai:
-      chat:
-        options:
-          temperature: 0.9  # 开发环境使用更高的创造性
-
-  # 开发环境使用H2内存数据库
-  datasource:
-    url: jdbc:h2:mem:devdb
-    username: sa
-    password:
-
-  h2:
-    console:
-      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # 每次测试重建表结构
 
 logging:
   level:
-    root: INFO
-    org.springframework.ai: DEBUG
+    org.springframework.ai: WARN
+    com.example.kb: DEBUG
+
+# 环境变量示例
+# DATABASE_URL=jdbc:postgresql://localhost:5432/postgres_test
+# PGVECTOR_TABLE=vector_store_test
+# PGVECTOR_BATCH_SIZE=100
 ```
 
-**application-prod.yml（生产环境）：**
-
+**生产环境（application-prod.yml）：**
 ```yaml
+# 生产环境覆盖配置
 spring:
-  ai:
-    openai:
-      chat:
-        options:
-          temperature: 0.3  # 生产环境使用更稳定的输出
-
-  # 生产环境使用PostgreSQL
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate  # 生产环境不自动修改表结构
 
 logging:
   level:
     root: WARN
-    com.example: INFO
-  file:
-    name: /var/log/spring-ai-demo.log
+    com.example.kb: INFO
+
+# 环境变量示例
+# DATABASE_URL=jdbc:postgresql://prod-host:5432/postgres_prod
+# PGVECTOR_TABLE=vector_store_prod
+# OPENAI_TEMPERATURE=0.3
 ```
 
-### 3.3 自动配置类的工作原理
+**统一 Docker Compose 配置（docker-compose.yml）：**
+
+```yaml
+version: '3.8'
+
+services:
+  # PostgreSQL 17 + pgvector（支持多环境）
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: postgres-vector
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis（可选，用于缓存）
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+# 使用方式：
+# 开发环境: docker-compose up -d
+# 测试环境: POSTGRES_DB=postgres_test docker-compose up -d
+# 生产环境: 使用外部数据库或 K8s 部署
+```
+
+**环境一致性最佳实践：**
+
+为确保开发、测试和生产环境的一致性，建议：
+
+1. **统一数据库**：所有环境都使用 PostgreSQL 17 + pgvector
+2. **版本锁定**：使用相同的 PostgreSQL 和 pgvector 版本
+3. **配置标准化**：使用相同的向量存储配置参数
+4. **数据隔离**：不同环境使用不同的数据库名称
+
+```bash
+# 环境数据库命名规范
+开发环境: postgres_dev
+测试环境: postgres_test
+生产环境: postgres_prod
+```
+
+### 3.3 环境变量配置
+
+**统一环境变量配置（.env 文件）：**
+
+```bash
+# === 数据库配置 ===
+DATABASE_URL=jdbc:postgresql://localhost:5432/postgres
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=postgres
+JPA_DDL_AUTO=update
+
+# === AI 模型配置 ===
+OPENAI_API_KEY=your-openai-api-key
+OPENAI_CHAT_MODEL=gpt-4o
+OPENAI_EMBEDDING_MODEL=text-embedding-3-large
+OPENAI_TEMPERATURE=0.7
+
+# === 向量存储配置 ===
+PGVECTOR_INDEX_TYPE=HNSW
+PGVECTOR_DISTANCE_TYPE=COSINE_DISTANCE
+PGVECTOR_DIMENSIONS=1536
+PGVECTOR_INIT_SCHEMA=true
+PGVECTOR_SCHEMA=public
+PGVECTOR_TABLE=vector_store
+PGVECTOR_BATCH_SIZE=10000
+
+# === 应用配置 ===
+DOCUMENT_STORAGE_PATH=./uploads
+DOCUMENT_MAX_SIZE=52428800
+DOCUMENT_ALLOWED_TYPES=pdf,txt,docx,md
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=200
+VECTORIZATION_BATCH_SIZE=10
+```
+
+**环境特定变量覆盖：**
+
+```bash
+# 开发环境 (.env.dev)
+DATABASE_URL=jdbc:postgresql://localhost:5432/postgres_dev
+PGVECTOR_TABLE=vector_store_dev
+JPA_DDL_AUTO=update
+
+# 测试环境 (.env.test)
+DATABASE_URL=jdbc:postgresql://localhost:5432/postgres_test
+PGVECTOR_TABLE=vector_store_test
+PGVECTOR_BATCH_SIZE=100
+JPA_DDL_AUTO=create-drop
+
+# 生产环境 (.env.prod)
+DATABASE_URL=jdbc:postgresql://prod-host:5432/postgres_prod
+PGVECTOR_TABLE=vector_store_prod
+OPENAI_TEMPERATURE=0.3
+JPA_DDL_AUTO=validate
+```
+
+**启动命令示例：**
+
+```bash
+# 开发环境
+export $(cat .env.dev | xargs) && mvn spring-boot:run
+
+# 测试环境
+export $(cat .env.test | xargs) && mvn test
+
+# 生产环境
+export $(cat .env.prod | xargs) && java -jar target/app.jar
+```
+
+**多模型配置示例（可选）：**
+
+```yaml
+# 如需支持多个 AI 模型提供商，可添加以下配置
+spring:
+  ai:
+    # Anthropic配置
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:}
+      chat:
+        enabled: ${ANTHROPIC_ENABLED:false}
+        options:
+          model: claude-3-5-sonnet-20241022
+          temperature: 0.7
+
+    # Azure OpenAI配置
+    azure:
+      openai:
+        api-key: ${AZURE_OPENAI_API_KEY:}
+        endpoint: ${AZURE_OPENAI_ENDPOINT:}
+        chat:
+          enabled: ${AZURE_OPENAI_ENABLED:false}
+          options:
+            deployment-name: gpt-4o
+
+    # Ollama配置（本地部署）
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        enabled: ${OLLAMA_ENABLED:false}
+        options:
+          model: llama3.1
+```
+
+### 3.4 自动配置类的工作原理
 
 Spring AI通过自动配置类简化了AI组件的配置和初始化过程。
 
@@ -1165,25 +1385,28 @@ public class OpenAiAutoConfiguration {
     }
 }
 
-// VectorStore自动配置
+// PgVectorStore自动配置（Spring AI 1.0）
 @AutoConfiguration
-@ConditionalOnClass(RedisVectorStore.class)
-@ConditionalOnProperty(prefix = "spring.ai.vectorstore.redis", name = "enabled", havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties(RedisVectorStoreProperties.class)
-public class RedisVectorStoreAutoConfiguration {
+@ConditionalOnClass(PgVectorStore.class)
+@ConditionalOnProperty(prefix = "spring.ai.vectorstore.pgvector", name = "enabled", havingValue = "true", matchIfMissing = true)
+@EnableConfigurationProperties(PgVectorStoreProperties.class)
+public class PgVectorStoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RedisVectorStore redisVectorStore(
-            RedisConnectionFactory connectionFactory,
+    public PgVectorStore pgVectorStore(
+            JdbcTemplate jdbcTemplate,
             EmbeddingModel embeddingModel,
-            RedisVectorStoreProperties properties) {
+            PgVectorStoreProperties properties) {
 
-        return RedisVectorStore.builder()
-            .connectionFactory(connectionFactory)
-            .embeddingModel(embeddingModel)
-            .indexName(properties.getIndex())
-            .prefix(properties.getPrefix())
+        return PgVectorStore.builder(jdbcTemplate, embeddingModel)
+            .dimensions(properties.getDimensions())
+            .distanceType(properties.getDistanceType())
+            .indexType(properties.getIndexType())
+            .initializeSchema(properties.isInitializeSchema())
+            .schemaName(properties.getSchemaName())
+            .vectorTableName(properties.getTableName())
+            .maxDocumentBatchSize(properties.getMaxDocumentBatchSize())
             .build();
     }
 }
@@ -1297,8 +1520,8 @@ cd spring-ai-demo
 
 ```xml
 <dependency>
-    <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+   <groupId>org.springframework.ai</groupId>
+   <artifactId>spring-ai-starter-model-openai</artifactId>
 </dependency>
 ```
 
@@ -1482,6 +1705,12 @@ public class AdvancedChatService {
 **完整RAG实现：**
 
 ```java
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.stereotype.Service;
+
 @Service
 public class RAGService {
 
@@ -1497,15 +1726,9 @@ public class RAGService {
         this.documentReader = documentReader;
         this.textSplitter = new TokenTextSplitter(1000, 200);
 
-        // 配置RAG Advisor
+        // 配置RAG Advisor (Spring AI 1.0)
         this.chatClient = builder
-            .defaultAdvisors(new RetrievalAugmentationAdvisor(
-                VectorStoreRetriever.builder()
-                    .vectorStore(vectorStore)
-                    .topK(5)
-                    .similarityThreshold(0.7)
-                    .build()
-            ))
+            .defaultAdvisors(QuestionAnswerAdvisor.builder(vectorStore).build())
             .build();
     }
 
@@ -2366,6 +2589,27 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 ```
 
+**数据库初始化脚本（init-db.sql）：**
+
+```sql
+-- 创建必要的扩展
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS hstore;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 创建向量存储表（可选，Spring AI 会自动创建）
+CREATE TABLE IF NOT EXISTS vector_store (
+    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    content text,
+    metadata json,
+    embedding vector(1536)
+);
+
+-- 创建 HNSW 索引以提高查询性能
+CREATE INDEX IF NOT EXISTS vector_store_embedding_idx
+ON vector_store USING hnsw (embedding vector_cosine_ops);
+```
+
 **Docker Compose配置：**
 
 ```yaml
@@ -2395,13 +2639,14 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg17
     environment:
       - POSTGRES_DB=springai
       - POSTGRES_USER=springai
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     restart: unless-stopped
 
   prometheus:
@@ -2538,25 +2783,22 @@ public class AIConfiguration {
             .defaultAdvisors(
                 new LoggingAdvisor(),
                 new SecurityAdvisor(),
-                new RetrievalAugmentationAdvisor(
-                    VectorStoreRetriever.builder()
-                        .vectorStore(vectorStore)
-                        .topK(5)
-                        .similarityThreshold(0.75)
-                        .build()
-                )
+                QuestionAnswerAdvisor.builder(vectorStore).build()
             )
             .build();
     }
 
     @Bean
-    public VectorStore vectorStore(EmbeddingModel embeddingModel,
-                                  RedisConnectionFactory connectionFactory) {
-        return RedisVectorStore.builder()
-            .connectionFactory(connectionFactory)
-            .embeddingModel(embeddingModel)
-            .indexName("enterprise-kb")
-            .prefix("doc:")
+    public VectorStore vectorStore(JdbcTemplate jdbcTemplate,
+                                  EmbeddingModel embeddingModel) {
+        return PgVectorStore.builder(jdbcTemplate, embeddingModel)
+            .dimensions(1536)
+            .distanceType(PgVectorStore.PgDistanceType.COSINE_DISTANCE)
+            .indexType(PgVectorStore.PgIndexType.HNSW)
+            .initializeSchema(true)
+            .schemaName("public")
+            .vectorTableName("enterprise_kb_vectors")
+            .maxDocumentBatchSize(10000)
             .build();
     }
 
@@ -3201,13 +3443,41 @@ Spring AI框架为企业级AI应用开发提供了完整的解决方案：
 3. **性能优化**：缓存、批处理、异步处理、连接池
 4. **监控运维**：指标收集、健康检查、错误处理
 
-**实施建议：**
-1. **技术选型**：根据业务需求选择合适的模型和向量数据库
-2. **架构设计**：考虑扩展性、可维护性和安全性
-3. **团队培训**：确保团队掌握AI应用开发的最佳实践
-4. **持续优化**：基于监控数据和用户反馈持续改进
+**Spring AI 1.0 实施建议：**
 
-通过本指南的学习和实践，您可以快速掌握Spring AI框架，构建出高质量的企业级AI应用。
+1. **版本选择**：
+   - 生产环境推荐使用 Spring AI 1.0.0 正式版
+   - 配合 Spring Boot 3.3+ 和 Java 17+ 使用
+   - 使用 PostgreSQL 17 + pgvector 作为向量存储
+
+2. **技术选型**：
+   - **向量数据库**：PostgreSQL 17 + pgvector（推荐）、Oracle、Neo4j
+   - **嵌入模型**：OpenAI text-embedding-3-large、Azure OpenAI
+   - **聊天模型**：OpenAI GPT-4、Anthropic Claude、本地 Ollama
+
+3. **架构设计**：
+   - 使用新的 starter 依赖：`spring-ai-starter-vector-store-pgvector`
+   - 启用观察性：配置日志记录和监控
+   - 考虑扩展性：使用批处理和异步处理
+   - 安全性：API 密钥管理、内容过滤、访问控制
+
+4. **迁移指南**：
+   - 更新依赖到 Spring AI 1.0.0
+   - 替换废弃的配置属性
+   - 使用新的自动配置模块
+   - 测试向量存储兼容性
+
+5. **生产部署**：
+   - 使用 Docker Compose 或 Kubernetes
+   - 配置 PostgreSQL 17 集群
+   - 启用监控和日志收集
+   - 实施备份和恢复策略
+
+**总结：**
+
+Spring AI 1.0 标志着框架的成熟，提供了生产级的稳定性和性能。通过本指南的学习和实践，结合 PostgreSQL 17 + pgvector 的强大向量搜索能力，您可以构建出高质量、可扩展的企业级 AI 应用。
+
+框架的 1.0 版本确保了 API 稳定性和向后兼容性，是企业采用 Spring AI 进行生产部署的理想选择。
 
 ---
 
