@@ -130,7 +130,7 @@ curl -X POST "http://localhost:8080/api/documents/1/reprocess?userId=admin"
 curl -X POST http://localhost:8080/api/query \
   -H "Content-Type: application/json" \
   -d '{
-    "question": "什么是 JVM？",
+    "question": "什么是 GC？",
     "userId": "admin"
   }'
 

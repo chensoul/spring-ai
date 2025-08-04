@@ -19,6 +19,7 @@ ON enterprise_kb_vectors USING hnsw (embedding vector_cosine_ops);
 CREATE TABLE IF NOT EXISTS documents (
     id BIGSERIAL PRIMARY KEY,
     filename VARCHAR(255) NOT NULL,
+    md5_hash VARCHAR(32) NOT NULL,
     category VARCHAR(100),
     uploaded_by VARCHAR(255) NOT NULL,
     upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -41,5 +42,7 @@ CREATE TABLE IF NOT EXISTS queries (
 -- 创建索引
 CREATE INDEX idx_documents_uploaded_by ON documents(uploaded_by);
 CREATE INDEX idx_documents_category ON documents(category);
+CREATE INDEX idx_documents_md5_hash ON documents(md5_hash);
+
 CREATE INDEX idx_queries_user_id ON queries(user_id);
 CREATE INDEX idx_queries_query_time ON queries(query_time DESC);

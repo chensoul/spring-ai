@@ -1,26 +1,37 @@
 package com.example.kb.model;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "documents")
 public class DocumentEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "filename")
     private String filename;
+    @Column(name = "md5_hash")
+    private String md5Hash;
+    @Column
     private String category;
+    @Column
     private String uploadedBy;
+    @Column
     private LocalDateTime uploadTime;
+    @Column
     private LocalDateTime processedTime;
+    @Column
     private String status; // PROCESSING, COMPLETED, FAILED
+    @Column
     private String errorMessage;
 
     // Constructors
-    public DocumentEntity() {}
+    public DocumentEntity() {
+    }
 
     public DocumentEntity(String filename, String category, String uploadedBy) {
         this.filename = filename;
@@ -93,5 +104,13 @@ public class DocumentEntity {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public String getMd5Hash() {
+        return md5Hash;
+    }
+
+    public void setMd5Hash(String md5Hash) {
+        this.md5Hash = md5Hash;
     }
 }

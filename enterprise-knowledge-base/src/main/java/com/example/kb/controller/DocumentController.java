@@ -36,7 +36,7 @@ public class DocumentController {
             @RequestParam("category") String category,
             @RequestParam(value = "userId", defaultValue = "admin") String userId) {
 
-        logger.info("收到文档上传请求: filename={}, category={}, userId={}", 
+        logger.info("收到文档上传请求: filename={}, category={}, userId={}",
                 file.getOriginalFilename(), category, userId);
 
         try {
@@ -68,11 +68,7 @@ public class DocumentController {
 
         try {
             List<DocumentEntity> documents = documentService.getDocuments(userId, category);
-            logger.debug("查询到文档数量: userId={}, count={}", userId, documents.size());
             return ResponseEntity.ok(documents);
-        } catch (IllegalArgumentException e) {
-            logger.warn("查询文档参数错误: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             logger.error("查询文档异常: userId={}, error={}", userId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -91,7 +87,7 @@ public class DocumentController {
 
         try {
             Optional<DocumentEntity> document = documentService.getDocumentById(id, userId);
-            
+
             if (document.isPresent()) {
                 logger.debug("文档详情查询成功: documentId={}", id);
                 return ResponseEntity.ok(document.get());
@@ -118,24 +114,24 @@ public class DocumentController {
         try {
             documentService.deleteDocument(id, userId);
             logger.info("文档删除成功: documentId={}", id);
-            
+
             Map<String, String> response = new HashMap<>();
             response.put("message", "文档删除成功");
             response.put("documentId", id.toString());
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalArgumentException e) {
             logger.warn("删除文档参数错误: documentId={}, error={}", id, e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(errorResponse);
-            
+
         } catch (SecurityException e) {
             logger.warn("删除文档权限不足: documentId={}, userId={}, error={}", id, userId, e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "无权限删除此文档");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
-            
+
         } catch (Exception e) {
             logger.error("删除文档异常: documentId={}, error={}", id, e.getMessage(), e);
             Map<String, String> errorResponse = new HashMap<>();
@@ -158,17 +154,17 @@ public class DocumentController {
             DocumentUploadResult result = documentService.reprocessDocument(id, userId);
             logger.info("文档重新处理启动成功: documentId={}", id);
             return ResponseEntity.ok(result);
-            
+
         } catch (IllegalArgumentException e) {
             logger.warn("重新处理文档参数错误: documentId={}, error={}", id, e.getMessage());
             DocumentUploadResult errorResult = new DocumentUploadResult(id, "VALIDATION_ERROR", e.getMessage());
             return ResponseEntity.badRequest().body(errorResult);
-            
+
         } catch (SecurityException e) {
             logger.warn("重新处理文档权限不足: documentId={}, userId={}, error={}", id, userId, e.getMessage());
             DocumentUploadResult errorResult = new DocumentUploadResult(id, "PERMISSION_ERROR", "无权限重新处理此文档");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResult);
-            
+
         } catch (Exception e) {
             logger.error("重新处理文档异常: documentId={}, error={}", id, e.getMessage(), e);
             DocumentUploadResult errorResult = new DocumentUploadResult(id, "ERROR", "重新处理失败：" + e.getMessage());
@@ -238,10 +234,10 @@ public class DocumentController {
             stats.put("categories", categories);
             stats.put("categoriesCount", categories.size());
 
-            logger.debug("文档统计查询成功: userId={}, total={}, failed={}", 
+            logger.debug("文档统计查询成功: userId={}, total={}, failed={}",
                     userId, allDocuments.size(), failedDocuments.size());
             return ResponseEntity.ok(stats);
-            
+
         } catch (Exception e) {
             logger.error("查询文档统计异常: userId={}, error={}", userId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -282,7 +278,7 @@ public class DocumentController {
         response.put("errorMessages", errorMessages);
 
         logger.info("批量删除完成: 成功={}, 失败={}", successIds.size(), failedIds.size());
-        
+
         if (failedIds.isEmpty()) {
             return ResponseEntity.ok(response);
         } else if (successIds.isEmpty()) {

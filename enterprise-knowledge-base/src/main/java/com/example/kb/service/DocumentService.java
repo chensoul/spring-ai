@@ -63,10 +63,10 @@ public class DocumentService {
 
         try {
             // 输入验证
-            validateUploadRequest(file, category, userId);
+            String md5Hash = validateUploadRequest(file, category, userId);
 
             // 创建文档实体
-            DocumentEntity document = createDocumentEntity(file, category, userId);
+            DocumentEntity document = createDocumentEntity(file, category, userId, md5Hash);
             DocumentEntity savedDoc = documentRepository.save(document);
 
             // 保存文件到配置的存储路径
@@ -178,7 +178,6 @@ public class DocumentService {
             documents = documentRepository.findByUploadedBy(userId);
         }
 
-        logger.debug("查询到文档数量: userId={}, count={}", userId, documents.size());
         return documents;
     }
 
@@ -276,7 +275,7 @@ public class DocumentService {
 
     // 私有辅助方法
 
-    private void validateUploadRequest(MultipartFile file, String category, String userId) {
+    private String validateUploadRequest(MultipartFile file, String category, String userId) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("文件不能为空");
         }
@@ -288,6 +287,18 @@ public class DocumentService {
         if (!StringUtils.hasText(category)) {
             throw new IllegalArgumentException("文档分类不能为空");
         }
+
+        // 检查文件名
+        String filename = file.getOriginalFilename();
+        if (!StringUtils.hasText(filename)) {
+            throw new IllegalArgumentException("文件名不能为空");
+        }
+
+        // 计算文件MD5
+        String md5Hash = calculateFileMd5(file);
+
+        // 检查文件是否已存在（基于MD5和文件名）
+        checkFileExists(filename, md5Hash, userId);
 
         // 使用配置的文件大小限制
         if (file.getSize() > kbProperties.getDocument().getMaxSize()) {
@@ -301,6 +312,75 @@ public class DocumentService {
             throw new IllegalArgumentException("不支持的文件类型: " + contentType +
                     "，支持的类型: " + String.join(", ", kbProperties.getDocument().getAllowedTypes()));
         }
+
+        // 检查文件内容是否可读
+        try {
+            if (file.getInputStream().available() == 0) {
+                throw new IllegalArgumentException("文件内容为空或无法读取");
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("无法读取文件内容: " + e.getMessage());
+        }
+
+        return md5Hash;
+    }
+
+    /**
+     * 计算文件MD5哈希值
+     */
+    private String calculateFileMd5(MultipartFile file) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+            byte[] digest = md.digest(file.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            logger.error("计算文件MD5失败: filename={}, error={}", file.getOriginalFilename(), e.getMessage());
+            throw new IllegalArgumentException("无法计算文件MD5: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 检查文件是否已存在（基于MD5和文件名）
+     */
+    private void checkFileExists(String filename, String md5Hash, String userId) {
+        // 首先检查MD5是否已存在（跨用户检查）
+        List<DocumentEntity> existingByMd5 = documentRepository.findByMd5Hash(md5Hash);
+
+        if (!existingByMd5.isEmpty()) {
+            // 检查是否有成功处理的文档
+            boolean hasCompletedDocument = existingByMd5.stream()
+                    .anyMatch(doc -> "COMPLETED".equals(doc.getStatus()));
+
+            if (hasCompletedDocument) {
+                // 找到已存在的文档信息
+                DocumentEntity existingDoc = existingByMd5.stream()
+                        .filter(doc -> "COMPLETED".equals(doc.getStatus()))
+                        .findFirst()
+                        .orElse(existingByMd5.get(0));
+
+                throw new IllegalArgumentException(
+                        String.format("文件已存在且处理完成。原文件: '%s' (用户: %s, 上传时间: %s)，请勿重复上传相同文件",
+                                existingDoc.getFilename(), existingDoc.getUploadedBy(), existingDoc.getUploadTime())
+                );
+            } else {
+                // 检查是否有正在处理的文档
+                boolean hasProcessingDocument = existingByMd5.stream()
+                        .anyMatch(doc -> "PROCESSING".equals(doc.getStatus()));
+
+                if (hasProcessingDocument) {
+                    throw new IllegalArgumentException("相同内容的文件正在处理中，请稍后再试");
+                } else {
+                    logger.warn("发现相同MD5的失败文档: filename={}, md5={}, userId={}", filename, md5Hash, userId);
+                    throw new IllegalArgumentException("相同内容的文件之前处理失败，请使用不同的文件或联系管理员");
+                }
+            }
+        }
+
+        logger.info("文件检查通过: filename={}, md5={}, userId={}", filename, md5Hash, userId);
     }
 
     private boolean isAllowedFileType(String contentType) {
@@ -325,13 +405,14 @@ public class DocumentService {
         }
     }
 
-    private DocumentEntity createDocumentEntity(MultipartFile file, String category, String userId) {
+    private DocumentEntity createDocumentEntity(MultipartFile file, String category, String userId, String md5Hash) {
         DocumentEntity document = new DocumentEntity();
         document.setFilename(file.getOriginalFilename());
         document.setCategory(category);
         document.setUploadedBy(userId);
         document.setUploadTime(LocalDateTime.now());
         document.setStatus("PROCESSING");
+        document.setMd5Hash(md5Hash);
         return document;
     }
 

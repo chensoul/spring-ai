@@ -10,26 +10,17 @@ import java.util.List;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<DocumentEntity, Long> {
-    
+
     List<DocumentEntity> findByUploadedBy(String uploadedBy);
-    
+
     List<DocumentEntity> findByUploadedByAndCategory(String uploadedBy, String category);
-    
-    List<DocumentEntity> findByStatus(String status);
-    
-    @Query("SELECT d FROM DocumentEntity d WHERE d.uploadedBy = :userId AND d.category = :category")
-    List<DocumentEntity> findUserDocumentsByCategory(@Param("userId") String userId, 
-                                                    @Param("category") String category);
-    
+
     @Query("SELECT DISTINCT d.category FROM DocumentEntity d WHERE d.uploadedBy = :userId")
     List<String> findUserCategories(@Param("userId") String userId);
-    
+
     List<DocumentEntity> findByUploadedByAndStatus(String uploadedBy, String status);
-    
-    @Query("SELECT COUNT(d) FROM DocumentEntity d WHERE d.uploadedBy = :userId AND d.status = :status")
-    long countByUserAndStatus(@Param("userId") String userId, @Param("status") String status);
-    
-    @Query("SELECT d FROM DocumentEntity d WHERE d.uploadedBy = :userId ORDER BY d.uploadTime DESC")
-    List<DocumentEntity> findRecentDocumentsByUser(@Param("userId") String userId, 
-                                                   org.springframework.data.domain.Pageable pageable);
+
+    // 根据MD5查询（跨用户）
+    List<DocumentEntity> findByMd5Hash(String md5Hash);
+
 }
